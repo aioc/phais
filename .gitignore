@@ -1,1 +1,5 @@
 bin/
+src/games/*
+!src/games/blockade
+!src/games/ju
+!src/games/tron
