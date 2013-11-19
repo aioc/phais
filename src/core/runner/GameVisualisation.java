@@ -19,18 +19,18 @@ public class GameVisualisation extends JPanel {
 	private static final String DEFAULT_TITLE = "";
 	private static final int DEFAULT_WIDTH = 1280;
 	private static final int DEFAULT_HEIGHT = 800;
+	private static final int MSPF = 30;
 
 	private GameInstance game;
 	private JFrame theFrame;
 	private boolean toClose;
-	
-	public GameVisualisation() {
+	private long preTime;
 
+	public GameVisualisation() {
 		String title = DEFAULT_TITLE;
 		try {
 			title = InetAddress.getLocalHost().getHostAddress();
-		} catch (Exception e) {
-		}
+		} catch (Exception e) {}
 		theFrame = new JFrame(title);
 		setBackground(Color.BLACK);
 		theFrame.setBounds(10, 10, DEFAULT_WIDTH, DEFAULT_HEIGHT);
@@ -43,11 +43,14 @@ public class GameVisualisation extends JPanel {
 
 	@Override
 	public void paintComponent(Graphics g) {
+		preTime = System.currentTimeMillis();
 		super.paintComponent(g);
-		game.getVisualisation(g, theFrame.getBounds().width, theFrame.getBounds().height);
-		try {
-			Thread.sleep(10);
-		} catch (Exception e) {}
+		game.getVisualisation(g, getWidth(), getHeight());
+		while (System.currentTimeMillis() - preTime < MSPF) {
+			try {
+				Thread.sleep(2);
+			} catch (Exception e) {}
+		}
 		repaint();
 
 	}
