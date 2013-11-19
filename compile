@@ -1,0 +1,6 @@
+#!/bin/bash
+
+rm -rf bin
+mkdir bin
+javac  `find src -name \*.java -print` -d bin
+
