@@ -50,7 +50,12 @@ public class ShellCommander implements Commander {
 		out.println("PHAIS shell commander. Type \"help\" or \"?\" for command list");
 		while (reportTo.isRunning()) {
 			out.print("$ ");
-			String rawInput = in.nextLine();
+			String rawInput;
+			try {
+				rawInput = in.nextLine();
+			} catch (Exception e) {
+				rawInput = "QUIT";	
+			}
 			String[] inputTokens = rawInput.split("\\s+");
 
 			String command = inputTokens[0].toUpperCase();
