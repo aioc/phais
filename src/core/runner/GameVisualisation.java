@@ -19,7 +19,7 @@ public class GameVisualisation extends JPanel {
 	private static final String DEFAULT_TITLE = "";
 	private static final int DEFAULT_WIDTH = 1280;
 	private static final int DEFAULT_HEIGHT = 800;
-	private static final int MSPF = 100;
+	private static final int MSPF = 30;
 
 	private GameInstance game;
 	private JFrame theFrame;
