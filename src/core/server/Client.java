@@ -38,6 +38,9 @@ public class Client implements ClientConnection {
 	public String getStrInput() throws DisconnectedException {
 		// We need to check for two things. First, that they don't time out.
 		// Second, that they haven't disconnected.
+		if (!isConnected()) {
+			drop();
+		}
 		long curTime = System.currentTimeMillis();
 		long lastPingTime = System.currentTimeMillis();
 		String in = null;

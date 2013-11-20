@@ -18,6 +18,7 @@ public class InputPoller implements Runnable {
 		this.inputter = inputter;
 	}
 
+	// TODO: Consider making this loop only run when we expect input (are in a game). Otherwise consumes too much CPU
 	@Override
 	public void run() {
 		running = true;
@@ -27,12 +28,15 @@ public class InputPoller implements Runnable {
 				synchronized (availableInput) {
 					availableInput.add(input);
 				}
-				Thread.sleep(10);
 			} catch (Exception e) {
 				if (!(e instanceof NoSuchElementException)) {
 					exceptionOccured = true;
 					running = false;
 				}
+			}
+			try {
+				Thread.sleep(10);
+			} catch (InterruptedException e) {
 			}
 		}
 	}
