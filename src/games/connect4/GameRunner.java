@@ -138,4 +138,7 @@ public class GameRunner implements GameInstance {
 		return 1 << (players.size() - pos - 1);
 	}
 
+	@Override
+	public void handleWindowResize(int w, int h) {
+	}
 }

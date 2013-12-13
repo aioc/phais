@@ -120,5 +120,8 @@ public class GameRunner implements GameInstance {
 	public Map<PersistentPlayer, Integer> getResults() {
 		return results;
 	}
-
+ 
+	@Override
+	public void handleWindowResize(int w, int h) {
+	}
 }

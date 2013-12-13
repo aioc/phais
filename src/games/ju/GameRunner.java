@@ -215,4 +215,7 @@ public class GameRunner implements GameInstance {
 		return results;
 	}
 	
+	@Override
+	public void handleWindowResize(int w, int h) {
+	}
 }
