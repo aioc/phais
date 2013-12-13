@@ -3,6 +3,8 @@ package core.runner;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.net.InetAddress;
 
 import javax.swing.JFrame;
@@ -39,6 +41,11 @@ public class GameVisualisation extends JPanel {
 		theFrame.getContentPane().add(this);
 		theFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
 		toClose = false;
+		theFrame.getRootPane().addComponentListener(new ComponentAdapter() {
+			public void componentResized(ComponentEvent e) {
+				GameVisualisation.this.handleWindowResize();
+			}
+		});
 	}
 
 	@Override
@@ -53,6 +60,10 @@ public class GameVisualisation extends JPanel {
 		}
 		repaint();
 
+	}
+
+	private void handleWindowResize() {
+		game.handleWindowResize(getWidth(), getHeight());
 	}
 
 	// TODO make the visualiser toggleable

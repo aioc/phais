@@ -35,6 +35,14 @@ public interface GameInstance {
 	public void getVisualisation(Graphics g, int width, int height);
 
 	/**
+	 * This method should do any bookkeeping required to handle a window
+	 * resize event.
+	 * @param width The width of the drawing context.
+	 * @param height The height of the drawing context.
+	 */
+	public void handleWindowResize(int width, int height);
+
+	/**
 	 * This method should return a map of PersistentPlayers to an integer score.
 	 * There should be an entry for every player in the game.
 	 * <p />
