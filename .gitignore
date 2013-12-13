@@ -5,3 +5,4 @@ src/games/*
 !src/games/connect4
 !src/games/tron
 .classpath
+*.class
