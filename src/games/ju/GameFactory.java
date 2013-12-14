@@ -12,8 +12,8 @@ import core.server.DisconnectedException;
 public class GameFactory implements GameBuilder {
 
 	public static final int NUM_ROUNDS = 13;
-	public static int BABCHANCE        = 0;
-	public static boolean SWEETBABMUSIC = false;
+	public static int BABCHANCE        = 2;
+	public static boolean SWEETBABMUSIC = true;
 	private long lastTime = 0;
 	private static final long WAITTIME  = 1000 * 60 * 4;
 

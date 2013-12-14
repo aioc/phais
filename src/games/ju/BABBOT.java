@@ -267,7 +267,7 @@ public class BABBOT extends Player {
 	public static Clip playSweetBABMusic() {
 		Clip clip = null;
 		try {
-			AudioInputStream soundIn = AudioSystem.getAudioInputStream(new BufferedInputStream(Main.class.getResourceAsStream("/resources/babmusic.wav")));
+			AudioInputStream soundIn = AudioSystem.getAudioInputStream(new BufferedInputStream(JuMain.class.getResourceAsStream("/resources/babmusic.wav")));
 			AudioFormat format = soundIn.getFormat();
 			DataLine.Info info = new DataLine.Info(Clip.class, format);
 			clip = (Clip)AudioSystem.getLine(info);
