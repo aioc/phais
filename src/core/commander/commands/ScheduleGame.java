@@ -16,7 +16,6 @@ public class ScheduleGame implements Command {
 
 		for (String name : args) {
 			PersistentPlayer toAdd = reportTo.getPlayerFromName(name);
-
 			if (toAdd == null) {
 				out.println(name + " is not a connected player");
 			} else {

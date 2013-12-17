@@ -9,7 +9,7 @@ public class Client implements ClientConnection {
 	private SocketTransport output;
 	private InputPoller input;
 	private boolean connected;
-	
+
 	private final static long PING_TIMEOUT = 3000;
 
 	public Client(int timeout, Socket socket) {
@@ -36,6 +36,10 @@ public class Client implements ClientConnection {
 
 	@Override
 	public String getStrInput() throws DisconnectedException {
+		return getStrInput(false);
+	}
+
+	public String getStrInput(boolean ignorePings) throws DisconnectedException {
 		// We need to check for two things. First, that they don't time out.
 		// Second, that they haven't disconnected.
 		if (!isConnected()) {
@@ -60,11 +64,12 @@ public class Client implements ClientConnection {
 				if (input.inputAvailable()) {
 					in = input.getInput();
 					lastPingTime = System.currentTimeMillis();
-					if (in.startsWith("PING")) {
+					if (in.startsWith("PING") && ignorePings) {
 						in = null;
 					}
+				} else {
+					Thread.sleep(5);
 				}
-				Thread.sleep(5);
 			} catch (Exception e) {
 				e.printStackTrace();
 				drop();
@@ -95,6 +100,17 @@ public class Client implements ClientConnection {
 			input.stop();
 			output.close();
 		} catch (IOException e) {}
+	}
+
+	@Override
+	public boolean checkConnected() {
+		boolean con = true;
+		try {
+			getStrInput(false);
+		} catch (DisconnectedException de) {
+			con = false;
+		}
+		return con;
 	}
 
 }

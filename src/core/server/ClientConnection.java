@@ -53,4 +53,12 @@ public interface ClientConnection {
 	 */
 	public boolean isConnected();
 
+	/**
+	 * Forces a recheck to see if they are connected. Will return true iff they
+	 * are still connected
+	 * 
+	 * @return true iff they are stilled connected after checking
+	 */
+	public boolean checkConnected();
+
 }

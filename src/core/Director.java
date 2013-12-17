@@ -187,6 +187,8 @@ public class Director {
 						
 						newThread.start();
 					}
+				} else {
+					reschedulePlayers(players);
 				}
 			}
 		}
