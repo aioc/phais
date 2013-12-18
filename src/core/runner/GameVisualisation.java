@@ -6,6 +6,8 @@ import java.awt.Graphics;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.net.InetAddress;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -58,7 +60,9 @@ public class GameVisualisation extends JPanel {
 				Thread.sleep(2);
 			} catch (Exception e) {}
 		}
-		repaint();
+		if (!toClose) {
+			repaint();
+		}
 
 	}
 
@@ -77,14 +81,19 @@ public class GameVisualisation extends JPanel {
 
 	public void close() {
 		toClose = true;
-		try {
-			Thread.sleep(2000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
+		Timer t= new Timer();
+		t.schedule(new HideTask(), 10000);
+	}
+	
+	private class HideTask extends TimerTask {
+
+		@Override
+		public void run() {
+			if (toClose) {
+				theFrame.setVisible(false);
+			}
 		}
-		if (toClose) {
-			theFrame.dispose();
-		}
+		
 	}
 
 }
