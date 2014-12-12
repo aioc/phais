@@ -20,7 +20,7 @@ public class SocketTransport {
 
 	public void write(String s) {
 		//out.write(s + "\n");
-		out.println(s);
+		out.print(s + "\n");
 		out.flush();
 	}
 
