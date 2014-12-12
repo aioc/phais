@@ -12,5 +12,5 @@ public class TronMain {
 		config.port = 12317;
 		new Director(new PlayerFactory(), new GameFactory(), new EmptyGameCommandHandler()).run(config);
 	}
-
+	
 }
