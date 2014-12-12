@@ -16,14 +16,17 @@ import core.commander.commands.ListPlayers;
 import core.commander.commands.ScheduleGame;
 import core.commander.commands.ScheduleRandom;
 import core.commander.commands.SetVisualiser;
+import core.interfaces.GameCommandHandler;
 
 public class ShellCommander implements Commander {
 	private Director reportTo;
+	private GameCommandHandler gameCommands;
 	private PrintStream out;
 	private Map<String, Command> commands;
 
-	public ShellCommander(Director reportTo) {
+	public ShellCommander(Director reportTo, GameCommandHandler gameCommands) {
 		this.reportTo = reportTo;
+		this.gameCommands = gameCommands;
 		out = System.out;
 		commands = new HashMap<String, Command>();
 		fillCommands();
@@ -34,11 +37,11 @@ public class ShellCommander implements Commander {
 		commands.put("LS", new ListPlayers());
 		commands.put("LIST", commands.get("LS"));
 		commands.put("KICK", new KickPlayers());
-		commands.put("RANDOM", new ScheduleRandom());
 		commands.put("PLAY", new ScheduleGame());
 		commands.put("VIS", new SetVisualiser());
 		commands.put("SCORES", new DisplayScores());
 		commands.put("QUIT", new Kill());
+		//TODO: Add round command for scheduling a round robin
 
 		commands.put("HELP", new HelpDisplayer(commands));
 		commands.put("?", commands.get("HELP"));
@@ -65,19 +68,11 @@ public class ShellCommander implements Commander {
 			// username
 			if (commands.containsKey(command)) {
 				commands.get(command).execute(reportTo, out, args);
-			} else if (command.equals("ROUND")) {
-				// change mode so that round robin begins with 2*args[0] games
-				// per pairing are played
-			} else if (command.equals("SIZE")) {
-				// ultimately allow for changing size of game boards, etc.
-				/*
-				 * } else if (reportTo.isGameCommand(command)) {{
-				 * reportTo.passThrough(command, args);
-				 */
-			} else{
+			} else if (!gameCommands.handleCommand(command, args)) {
 				out.println(command + ": command not found");
 			}
 		}
+		in.close();
 		// out.println("Commander exiting...");
 	}
 
