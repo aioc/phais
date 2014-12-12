@@ -2,7 +2,6 @@ package games.tron;
 
 import core.Config;
 import core.Director;
-import core.commander.EmptyGameCommandHandler;
 
 public class TronMain {
 
@@ -10,7 +9,7 @@ public class TronMain {
 		Config config = new Config();
 		config.parseArgs(args);
 		config.port = 12317;
-		new Director(new PlayerFactory(), new GameFactory(), new EmptyGameCommandHandler()).run(config);
+		new Director(new PlayerFactory(), new GameFactory()).run(config);
 	}
 	
 }

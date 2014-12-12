@@ -1,5 +1,10 @@
 package core;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import core.commander.commands.Command;
+
 public class Config {
 
 	public enum Mode {
@@ -13,6 +18,7 @@ public class Config {
 	public int timeout = 2000;
 	public int maxParallelGames = 2;
 	public boolean visualise = true;
+	public Map<String, Command> gameCommands = new HashMap<String, Command>();
 
 	public void parseArgs(String[] args) {
 		// TODO parse command line arguments

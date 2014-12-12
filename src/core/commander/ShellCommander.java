@@ -16,23 +16,20 @@ import core.commander.commands.ListPlayers;
 import core.commander.commands.ScheduleGame;
 import core.commander.commands.ScheduleRandom;
 import core.commander.commands.SetVisualiser;
-import core.interfaces.GameCommandHandler;
 
 public class ShellCommander implements Commander {
 	private Director reportTo;
-	private GameCommandHandler gameCommands;
 	private PrintStream out;
 	private Map<String, Command> commands;
 
-	public ShellCommander(Director reportTo, GameCommandHandler gameCommands) {
+	public ShellCommander(Director reportTo, Map<String, Command> gameCommands) {
 		this.reportTo = reportTo;
-		this.gameCommands = gameCommands;
 		out = System.out;
 		commands = new HashMap<String, Command>();
-		fillCommands();
+		fillCommands(gameCommands);
 	}
 
-	private void fillCommands() {
+	private void fillCommands(Map<String, Command> gameCommands) {
 		commands.put("RANDOM", new ScheduleRandom());
 		commands.put("LS", new ListPlayers());
 		commands.put("LIST", commands.get("LS"));
@@ -42,7 +39,10 @@ public class ShellCommander implements Commander {
 		commands.put("SCORES", new DisplayScores());
 		commands.put("QUIT", new Kill());
 		//TODO: Add round command for scheduling a round robin
-
+		
+		for (String s : gameCommands.keySet()) {
+			commands.put(s, gameCommands.get(s));
+		}
 		commands.put("HELP", new HelpDisplayer(commands));
 		commands.put("?", commands.get("HELP"));
 	}
@@ -68,7 +68,7 @@ public class ShellCommander implements Commander {
 			// username
 			if (commands.containsKey(command)) {
 				commands.get(command).execute(reportTo, out, args);
-			} else if (!gameCommands.handleCommand(command, args)) {
+			} else {
 				out.println(command + ": command not found");
 			}
 		}

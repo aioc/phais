@@ -10,7 +10,6 @@ import java.util.Set;
 import core.commander.Commander;
 import core.commander.ShellCommander;
 import core.interfaces.GameBuilder;
-import core.interfaces.GameCommandHandler;
 import core.interfaces.GameInstance;
 import core.interfaces.PersistentPlayer;
 import core.interfaces.PlayerBuilder;
@@ -29,7 +28,6 @@ public class Director {
 
 	private GameBuilder gBuilder;
 	private PlayerBuilder pBuilder;
-	private GameCommandHandler gameCommands;
 	
 	private Integer curID;
 	private Server server;
@@ -45,10 +43,9 @@ public class Director {
 	
 	private boolean running;
 
-	public Director(PlayerBuilder pBuilder, GameBuilder gBuilder, GameCommandHandler gameCommands) {
+	public Director(PlayerBuilder pBuilder, GameBuilder gBuilder) {
 		this.pBuilder = pBuilder;
 		this.gBuilder = gBuilder;
-		this.gameCommands = gameCommands;
 		runnerGetter = new RunnerFactory();
 		playerMap = new HashMap<String, PersistentPlayer>();
 		runningGames = new HashSet<GameRunner>();
@@ -136,7 +133,7 @@ public class Director {
 			System.exit(1);
 		}
 		scheduler = new RandomScheduler(config.numPlayersPerGame);
-		commander = new ShellCommander(this, gameCommands);
+		commander = new ShellCommander(this, config.gameCommands);
 		scoreKeeper = new StandardScoreKeeper();
 
 		// We now create the threads we need for various things

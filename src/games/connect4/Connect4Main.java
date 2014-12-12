@@ -2,7 +2,6 @@ package games.connect4;
 
 import core.Config;
 import core.Director;
-import core.commander.EmptyGameCommandHandler;
 
 public class Connect4Main {
 	public static void main (String[] args) {
@@ -11,6 +10,6 @@ public class Connect4Main {
 		config.parseArgs(args);
 		config.port = 12317;
 		config.numPlayersPerGame = 2;
-		new Director(new PlayerFactory(), new GameFactory(), new EmptyGameCommandHandler()).run(config);
+		new Director(new PlayerFactory(), new GameFactory()).run(config);
 	}
 }
