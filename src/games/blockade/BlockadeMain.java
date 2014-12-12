@@ -4,7 +4,7 @@ import core.Config;
 import core.Director;
 import core.commander.EmptyGameCommandHandler;
 
-public class Main {
+public class BlockadeMain {
 	public static void main (String[] args) {
 		System.out.println("Blockade started");
 		Config config = new Config();

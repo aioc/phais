@@ -4,7 +4,7 @@ import core.Config;
 import core.Director;
 import core.commander.EmptyGameCommandHandler;
 
-public class Main {
+public class TronMain {
 
 	public static void main(String[] args) {
 		Config config = new Config();
