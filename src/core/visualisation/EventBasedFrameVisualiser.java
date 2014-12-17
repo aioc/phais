@@ -4,9 +4,13 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+
+import javax.imageio.ImageIO;
 
 import core.interfaces.GameInstance;
 import core.interfaces.PersistentPlayer;
@@ -31,6 +35,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		this.v = v;
 		curState = initialState;
 		curEvents = new ArrayList<VisualGameEvent>();
+		stateImg = null;
 		backImg = null;
 		wasVisualising = false;
 		endGameEventSeen = false;
@@ -53,9 +58,10 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		if (stateImg == null) {
 			redrawState(width, height);
 		}
-		g.drawImage(stateImg, 0, 0, width, height, null);
+		//g.drawImage(stateImg, 0, 0, width, height, null);
 
 		// Finally, paint the events ontop
+		v.generateState(curState, width, height, (Graphics2D) g);
 		v.animateEvents(curState, curEvents, width, height, (Graphics2D) g);
 		
 		// Now fix up events
@@ -83,7 +89,6 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		v.generateBackground(curState, width, height, g);
 		g.dispose();
 		backImg = newBackImg;
-		
 	}
 	
 	private void redrawState(int width, int height) {
