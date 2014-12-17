@@ -110,6 +110,10 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		curEvents.add(ev);
 	}
 
+	public S getCurState() {
+		return curState;
+	}
+	
 	@Override
 	public Map<PersistentPlayer, Integer> getResults() {
 		return h.getResults();
