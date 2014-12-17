@@ -37,5 +37,12 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 	public Map<PersistentPlayer, Integer> getResults() {
 		return h.getResults();
 	}
+	
+	public boolean finishedVisualising() {
+		return false;
+	}
 
+	public boolean isVisualising() {
+		return true;
+	}
 }
