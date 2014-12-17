@@ -5,13 +5,13 @@ import java.util.List;
 
 public interface FrameVisualisationHandler<S> {
 
-	void generateBackground(int sWidth, int sHeight, Graphics2D g);
+	void generateBackground(S state, int sWidth, int sHeight, Graphics2D g);
 	
-	void generateState(int sWidth, int sHeight, S state, Graphics2D g);
+	void generateState(S state, int sWidth, int sHeight, Graphics2D g);
 	
 	void eventCreated(VisualGameEvent e);
 	
-	void animateEvents(List<VisualGameEvent> events);
+	void animateEvents(S state, List<VisualGameEvent> events, int sWidth, int sHeight, Graphics2D g);
 	
 	void eventEnded(VisualGameEvent e, S state);
 	
