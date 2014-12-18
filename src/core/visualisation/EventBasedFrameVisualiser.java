@@ -72,7 +72,6 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 					newEvents.add(e);
 				}
 			}
-
 			curEvents = newEvents;
 		}
 		if (stateChanged) {
@@ -87,6 +86,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		Graphics2D g = newBackImg.createGraphics();
 		v.generateBackground(curState, width, height, g);
 		g.dispose();
+		redrawState(width, height);
 		backImg = newBackImg;
 	}
 
@@ -116,7 +116,9 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		}
 		v.eventCreated(ev);
 		ev.curFrame = 0;
-		curEvents.add(ev);
+		synchronized (curEvents) {
+			curEvents.add(ev);
+		}
 	}
 
 	public S getCurState() {
