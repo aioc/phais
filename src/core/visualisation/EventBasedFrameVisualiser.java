@@ -4,13 +4,9 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
-import javax.imageio.ImageIO;
 
 import core.interfaces.GameInstance;
 import core.interfaces.PersistentPlayer;
@@ -58,10 +54,10 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		if (stateImg == null) {
 			redrawState(width, height);
 		}
-		//g.drawImage(stateImg, 0, 0, width, height, null);
+		g.drawImage(stateImg, 0, 0, width, height, null);
 
 		// Finally, paint the events ontop
-		v.generateState(curState, width, height, (Graphics2D) g);
+		//v.generateState(curState, width, height, (Graphics2D) g);
 		v.animateEvents(curState, curEvents, width, height, (Graphics2D) g);
 		
 		// Now fix up events
@@ -92,7 +88,12 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 	}
 	
 	private void redrawState(int width, int height) {
-		BufferedImage newStateImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+		BufferedImage newStateImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+		for (int i = 0; i < newStateImg.getHeight(); i++) {
+			for (int j = 0; j < newStateImg.getWidth(); j++) {
+				newStateImg.setRGB(j, i, 0x00000000);
+			}
+		}
 		Graphics2D g = newStateImg.createGraphics();
 		v.generateState(curState, width, height, g);
 		g.dispose();
