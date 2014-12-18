@@ -5,6 +5,8 @@ import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.InetAddress;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -48,6 +50,13 @@ public class GameVisualisation extends JPanel {
 				GameVisualisation.this.handleWindowResize();
 			}
 		});
+		
+		theFrame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				GameVisualisation.this.handleClosing();
+			}
+		});
 	}
 
 	@Override
@@ -72,13 +81,17 @@ public class GameVisualisation extends JPanel {
 
 	// TODO make the visualiser toggleable
 	public void show(GameInstance game) {
-		System.out.println("New game shown");
 		this.game = game;
 		if (!theFrame.isVisible()) {
 			theFrame.setVisible(true);
 		}
 		toClose = false;
 		repaint();
+	}
+	
+	public void handleClosing() {
+		game.windowClosed();
+		close();
 	}
 
 	public void close() {

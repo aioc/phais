@@ -89,6 +89,11 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		redrawState(width, height);
 		backImg = newBackImg;
 	}
+	
+	@Override
+	public void windowClosed() {
+		wasVisualising = false;
+	}
 
 	private void redrawState(int width, int height) {
 		BufferedImage newStateImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);

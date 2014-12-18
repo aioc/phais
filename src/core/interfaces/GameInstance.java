@@ -41,6 +41,11 @@ public interface GameInstance {
 	 * @param height The height of the drawing context.
 	 */
 	public void handleWindowResize(int width, int height);
+	
+	/**
+	 * This gets called whenever the visualising window gets closed
+	 */
+	public void windowClosed();
 
 	/**
 	 * This method should return a map of PersistentPlayers to an integer score.

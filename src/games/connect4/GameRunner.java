@@ -141,4 +141,8 @@ public class GameRunner implements GameInstance {
 	@Override
 	public void handleWindowResize(int w, int h) {
 	}
+
+	@Override
+	public void windowClosed() {
+	}
 }
