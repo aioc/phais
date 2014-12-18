@@ -72,11 +72,13 @@ public class GameVisualisation extends JPanel {
 
 	// TODO make the visualiser toggleable
 	public void show(GameInstance game) {
+		System.out.println("New game shown");
 		this.game = game;
 		if (!theFrame.isVisible()) {
 			theFrame.setVisible(true);
 		}
 		toClose = false;
+		repaint();
 	}
 
 	public void close() {

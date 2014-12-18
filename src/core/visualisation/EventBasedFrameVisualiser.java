@@ -12,20 +12,20 @@ import core.interfaces.GameInstance;
 import core.interfaces.PersistentPlayer;
 
 public class EventBasedFrameVisualiser<S> implements GameInstance {
-	
+
 	private GameHandler h;
 	private FrameVisualisationHandler<S> v;
-	
+
 	private S curState;
-	
+
 	private List<VisualGameEvent> curEvents;
-	
+
 	private Image backImg;
 	private Image stateImg;
-	
+
 	private boolean wasVisualising;
 	private boolean endGameEventSeen;
-	
+
 	public EventBasedFrameVisualiser(GameHandler h, FrameVisualisationHandler<S> v, S initialState) {
 		this.h = h;
 		this.v = v;
@@ -36,7 +36,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		wasVisualising = false;
 		endGameEventSeen = false;
 	}
-	
+
 	@Override
 	public void begin() {
 		h.begin();
@@ -57,25 +57,28 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		g.drawImage(stateImg, 0, 0, width, height, null);
 
 		// Finally, paint the events ontop
-		//v.generateState(curState, width, height, (Graphics2D) g);
-		v.animateEvents(curState, curEvents, width, height, (Graphics2D) g);
-		
-		// Now fix up events
-		List<VisualGameEvent> newEvents = new ArrayList<>();
 		boolean stateChanged = false;
-		for (VisualGameEvent e : curEvents) {
-			e.curFrame++;
-			if (e.curFrame == e.totalFrames) {
-				v.eventEnded(e, curState);
-				stateChanged = true;
-			} else {
-				newEvents.add(e);
+		synchronized (curEvents) {
+			v.animateEvents(curState, curEvents, width, height, (Graphics2D) g);
+			// Now fix up events
+			List<VisualGameEvent> newEvents = new ArrayList<>();
+			for (VisualGameEvent e : curEvents) {
+				e.curFrame++;
+				if (e.curFrame == e.totalFrames) {
+					v.eventEnded(e, curState);
+					stateChanged = true;
+				} else {
+					System.out.println(e.getClass().getName());
+					newEvents.add(e);
+				}
 			}
+
+			curEvents = newEvents;
 		}
-		curEvents = newEvents;
 		if (stateChanged) {
 			redrawState(width, height);
 		}
+		wasVisualising = true;
 	}
 
 	@Override
@@ -86,7 +89,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		g.dispose();
 		backImg = newBackImg;
 	}
-	
+
 	private void redrawState(int width, int height) {
 		BufferedImage newStateImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
 		for (int i = 0; i < newStateImg.getHeight(); i++) {
@@ -99,13 +102,13 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		g.dispose();
 		stateImg = newStateImg;
 	}
-	
+
 	public void giveEvents(List<VisualGameEvent> events) {
 		for (VisualGameEvent e : events) {
 			giveEvent(e);
 		}
 	}
-	
+
 	public void giveEvent(VisualGameEvent ev) {
 		if (ev instanceof EndGameEvent) {
 			endGameEventSeen = true;
@@ -119,12 +122,12 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 	public S getCurState() {
 		return curState;
 	}
-	
+
 	@Override
 	public Map<PersistentPlayer, Integer> getResults() {
 		return h.getResults();
 	}
-	
+
 	public boolean finishedVisualising() {
 		return curEvents.size() == 0 && endGameEventSeen;
 	}
