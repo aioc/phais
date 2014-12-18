@@ -8,7 +8,7 @@ import core.commander.commands.Command;
 public class Config {
 
 	public enum Mode {
-		RANDOM, ROUND_ROBIN
+		RANDOM, ROUND_ROBIN, PAUSE
 	}
 
 	public int numPlayersPerGame = 2;

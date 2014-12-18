@@ -14,7 +14,9 @@ import core.commander.commands.KickPlayers;
 import core.commander.commands.Kill;
 import core.commander.commands.ListPlayers;
 import core.commander.commands.ScheduleGame;
+import core.commander.commands.SchedulePause;
 import core.commander.commands.ScheduleRandom;
+import core.commander.commands.ScheduleRoundRobin;
 import core.commander.commands.SetVisualiser;
 
 public class ShellCommander implements Commander {
@@ -31,6 +33,8 @@ public class ShellCommander implements Commander {
 
 	private void fillCommands(Map<String, Command> gameCommands) {
 		commands.put("RANDOM", new ScheduleRandom());
+		commands.put("ROUNDROBIN", new ScheduleRoundRobin());
+		commands.put("PAUSE", new SchedulePause());
 		commands.put("LS", new ListPlayers());
 		commands.put("LIST", commands.get("LS"));
 		commands.put("KICK", new KickPlayers());

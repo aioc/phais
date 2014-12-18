@@ -1,90 +1,37 @@
 package core.scheduler;
 
-import java.util.Deque;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Queue;
+import java.util.Map;
 import java.util.Set;
 
 import core.Config.Mode;
 import core.interfaces.PersistentPlayer;
 
 public class RoundRobinScheduler implements GameScheduler {
-	private int numPlayersPerGame;
-
-	private Deque<LinkedList<PersistentPlayer>> gamesQueued;
-	private Queue<LinkedList<PersistentPlayer>> gamesManuallyQueued;
+	
 	private Set<PersistentPlayer> playersAvailable;
-	private Set<PersistentPlayer> playersEncountered;
+	private Map<PersistentPlayer, Set<PersistentPlayer>> matchesPlayed;
 
-	public RoundRobinScheduler(int numPlayersPerGame) {
-		this.numPlayersPerGame = numPlayersPerGame;
-		gamesQueued = new LinkedList<LinkedList<PersistentPlayer>>();
-		gamesManuallyQueued = new LinkedList<LinkedList<PersistentPlayer>>();
+	//TODO: Support more than 2 players
+	public RoundRobinScheduler() {
+		matchesPlayed = new HashMap<>();
 		playersAvailable = new HashSet<PersistentPlayer>();
-	}
-
-	private LinkedList<LinkedList<PersistentPlayer>> recurse(int ply, Set<PersistentPlayer> used) {
-		LinkedList<LinkedList<PersistentPlayer>> ret = new LinkedList<LinkedList<PersistentPlayer>>();
-
-		if (ply < numPlayersPerGame) {
-			for (PersistentPlayer p : playersEncountered) {
-				if (!used.contains(p.getID())) {
-					used.add(p);
-
-					for (LinkedList<PersistentPlayer> toAdd : recurse(ply + 1, used)) {
-						// append myself to the front
-						toAdd.addFirst(p);
-						ret.add(toAdd);
-					}
-
-					used.remove(p);
-				}
-			}
-		} else {
-			ret.add(new LinkedList<PersistentPlayer>());
-		}
-		return ret;
-	}
-
-	private LinkedList<LinkedList<PersistentPlayer>> getAllPermutations() {
-		LinkedList<LinkedList<PersistentPlayer>> ret = new LinkedList<LinkedList<PersistentPlayer>>();
-
-		ret.addAll(recurse(0, new HashSet<PersistentPlayer>()));
-
-		return ret;
 	}
 
 	@Override
 	public void addPlayer(PersistentPlayer player) {
-		if (!playersEncountered.contains(player)) {
-			for (List<PersistentPlayer> permutation : getAllPermutations()) {
-				// insert new player at all points
-				for (int i = 0; i <= permutation.size(); i++) {
-					List<PersistentPlayer> toAdd = new LinkedList<PersistentPlayer>();
-
-					int pos = 0;
-
-					for (PersistentPlayer p : permutation) {
-						if (pos == i) {
-							toAdd.add(player);
-						}
-
-						toAdd.add(p);
-
-						pos++;
-					}
-
-					// need to special case out adding at the end
-					if (i == permutation.size()) {
-						toAdd.add(player);
-					}
-				}
+		synchronized (matchesPlayed) {
+			if (!matchesPlayed.containsKey(player)) {
+				matchesPlayed.put(player, new HashSet<PersistentPlayer>());
 			}
-			playersEncountered.add(player);
 		}
-		playersAvailable.add(player);
+		synchronized (playersAvailable) {
+			playersAvailable.add(player);
+		}
 	}
 
 	@Override
@@ -96,49 +43,47 @@ public class RoundRobinScheduler implements GameScheduler {
 
 	@Override
 	public void scheduleGame(List<PersistentPlayer> players) {
-		gamesManuallyQueued.add(new LinkedList<PersistentPlayer>(players));
+		// Do nothing :p
 	}
 
 	@Override
 	public boolean hasGame() {
-		// TODO somehow disregard games that aren't playable (because available
-		// player isn't there)
-		return !gamesManuallyQueued.isEmpty() || !gamesQueued.isEmpty();
+		synchronized (playersAvailable) {
+			for (PersistentPlayer p : playersAvailable) {
+				for (PersistentPlayer p2 : playersAvailable) {
+					if (p != p2) {
+						synchronized (matchesPlayed) {
+							if (!matchesPlayed.get(p).contains(p2)) {
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	@Override
 	public List<PersistentPlayer> getGame() {
-		List<PersistentPlayer> ret = null;
-		synchronized (gamesQueued) {
-			if (hasGame()) {
-				if (gamesManuallyQueued.isEmpty()) {
-					int numGamesAvail = gamesQueued.size();
-
-					boolean goodGameFound = false;
-
-					for (int i = 0; i < numGamesAvail && !goodGameFound; i++) {
-						LinkedList<PersistentPlayer> top = gamesQueued.poll();
-
-						goodGameFound = true;
-
-						for (PersistentPlayer p : top) {
-							if (!playersAvailable.contains(p)) {
-								goodGameFound = false;
+		synchronized (playersAvailable) {
+			for (PersistentPlayer p : playersAvailable) {
+				for (PersistentPlayer p2 : playersAvailable) {
+					if (p != p2) {
+						synchronized (matchesPlayed) {
+							if (!matchesPlayed.get(p).contains(p2)) {
+								matchesPlayed.get(p).add(p2);
+								matchesPlayed.get(p2).add(p);
+								playersAvailable.remove(p);
+								playersAvailable.remove(p2);
+								return Arrays.asList(p, p2);
 							}
 						}
-						if (goodGameFound) {
-							ret = top;
-						} else {
-							gamesQueued.add(top);
-						}
 					}
-				} else {
-					ret = gamesManuallyQueued.remove();
 				}
 			}
 		}
-
-		return ret;
+		return null;
 	}
 	
 	public Mode getMode() {
@@ -147,6 +92,21 @@ public class RoundRobinScheduler implements GameScheduler {
 
 	@Override
 	public int getNumPlayersPerGame() {
-		return numPlayersPerGame;
+		return 2;
+	}
+
+	@Override
+	public List<PersistentPlayer> removeWaitingPlayers() {
+		List<PersistentPlayer> wait = new ArrayList<PersistentPlayer>();
+		synchronized (playersAvailable) {
+			for (PersistentPlayer p : playersAvailable) {
+				wait.add(p);
+			}
+			playersAvailable.clear();
+			synchronized (matchesPlayed) {
+				matchesPlayed.clear();
+			}
+		}
+		return wait;
 	}
 }

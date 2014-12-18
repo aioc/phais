@@ -62,4 +62,11 @@ public interface GameScheduler {
 	 * @return the number of players to be scheduled per game
 	 */
 	int getNumPlayersPerGame();
+	
+	/**
+	 * Returns all players currently in the scheduler, and removes them
+	 * 
+	 * @return the players waiting to be scheduled
+	 */
+	List<PersistentPlayer> removeWaitingPlayers();
 }

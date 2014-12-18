@@ -1,5 +1,6 @@
 package core.scheduler;
 
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -78,5 +79,16 @@ public class RandomScheduler implements GameScheduler {
 	@Override
 	public int getNumPlayersPerGame() {
 		return numPlayersPerGame;
+	}
+
+	@Override
+	public List<PersistentPlayer> removeWaitingPlayers() {
+		synchronized (players) {
+			List<PersistentPlayer> ps = new ArrayList<>();
+			while (!players.isEmpty()) {
+				ps.add(players.remove().getPlayer());
+			}
+			return ps;
+		}
 	}
 }

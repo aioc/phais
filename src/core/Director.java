@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import core.Config.Mode;
 import core.commander.Commander;
 import core.commander.ShellCommander;
 import core.interfaces.GameBuilder;
@@ -16,7 +17,9 @@ import core.interfaces.PlayerBuilder;
 import core.runner.GameRunner;
 import core.runner.RunnerFactory;
 import core.scheduler.GameScheduler;
+import core.scheduler.PauseScheduler;
 import core.scheduler.RandomScheduler;
+import core.scheduler.RoundRobinScheduler;
 import core.scorer.ScoreKeeper;
 import core.scorer.StandardScoreKeeper;
 import core.server.ClientConnection;
@@ -224,10 +227,32 @@ public class Director {
 		this.config = config;
 		
 		// check that everything is as expected
-		if (scheduler.getMode() != config.mode) {
+
+		GameScheduler newSch = null;
+		boolean scheChanged = false;
+		
+		if (scheduler.getMode() != config.mode || scheduler.getNumPlayersPerGame() != config.numPlayersPerGame) {
+			if (config.mode == Mode.RANDOM) {
+				newSch = new RandomScheduler(config.numPlayersPerGame);
+			} else if (config.mode == Mode.ROUND_ROBIN) {
+				newSch = new RoundRobinScheduler();
+			} else if (config.mode == Mode.PAUSE) {
+				newSch = new PauseScheduler();
+			}
+			scheChanged = true;
+		}
+		if (scheChanged) {
 			// TODO swap out the schedulers
-		} else if (scheduler.getNumPlayersPerGame() != config.numPlayersPerGame) {
-			// TODO note to self: also check that the number of players per game hasn't gone out of sync
+			GameScheduler oldSch = scheduler;
+			// Switch out now
+			synchronized (scheduler) {
+				scheduler = newSch;
+			}
+			// Add all the players into it
+			List<PersistentPlayer> waiting = oldSch.removeWaitingPlayers();
+			for (PersistentPlayer p : waiting) {
+				scheduler.addPlayer(p);
+			}
 		}
 	}
 	
