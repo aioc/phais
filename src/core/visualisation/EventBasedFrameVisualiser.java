@@ -68,7 +68,6 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 					v.eventEnded(e, curState);
 					stateChanged = true;
 				} else {
-					System.out.println(e.getClass().getName());
 					newEvents.add(e);
 				}
 			}
