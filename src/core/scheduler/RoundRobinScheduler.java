@@ -12,11 +12,11 @@ import core.Config.Mode;
 import core.interfaces.PersistentPlayer;
 
 public class RoundRobinScheduler implements GameScheduler {
-	
+
 	private Set<PersistentPlayer> playersAvailable;
 	private Map<PersistentPlayer, Set<PersistentPlayer>> matchesPlayed;
 
-	//TODO: Support more than 2 players
+	// TODO: Support more than 2 players
 	public RoundRobinScheduler() {
 		matchesPlayed = new HashMap<>();
 		playersAvailable = new HashSet<PersistentPlayer>();
@@ -85,7 +85,7 @@ public class RoundRobinScheduler implements GameScheduler {
 		}
 		return null;
 	}
-	
+
 	public Mode getMode() {
 		return Mode.ROUND_ROBIN;
 	}
