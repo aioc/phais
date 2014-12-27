@@ -1,9 +1,3 @@
 bin/
-src/games/*
-!src/games/blockade
-!src/games/ju
-!src/games/connect4
-!src/games/tron
 .classpath
-*.class
 .settings
