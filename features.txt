@@ -1,6 +1,6 @@
-Very easy plugin of game (don't care about networking, managing gui's and connections).
+Very easy plugin of game (don't care about networking, managing GUIs and connections).
 Able to do a round robin
-Able to see what games are schedualed.
+Able to see what games are scheduled.
 Able to run multiple games at the same time (each with its own visualiser)
 Queue a game
 GUI associated with the director. 
