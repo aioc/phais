@@ -11,9 +11,10 @@ public class Pair<F, S> {
 	}
 
 	@Override
-	public equals(Object o) {
+	public boolean equals(Object o) {
 		if (o instanceof Pair<?, ?>) {
-			return ((Pair<?, ?>) o).first.equals(first) && ((Pair<?, ?> o).second.equals(second);
+			return ((Pair<?, ?>) o).first.equals(first)
+                && ((Pair<?, ?>) o).second.equals(second);
 		}
 		return false;
 	}
@@ -22,5 +23,4 @@ public class Pair<F, S> {
 	public int hashCode() {
 		return first.hashCode() ^ second.hashCode();
 	}
-
 }
