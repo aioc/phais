@@ -4,9 +4,11 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import com.ausinformatics.phais.core.interfaces.GameInstance;
 import com.ausinformatics.phais.core.interfaces.PersistentPlayer;
@@ -19,6 +21,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 	private S curState;
 
 	private List<VisualGameEvent> curEvents;
+	private Queue<VisualGameEvent> queuedEvents;
 
 	private Image backImg;
 	private Image stateImg;
@@ -26,15 +29,21 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 	private boolean wasVisualising;
 	private boolean endGameEventSeen;
 
+	private int curTurn;
+	private int markingTurn;
+
 	public EventBasedFrameVisualiser(GameHandler h, FrameVisualisationHandler<S> v, S initialState) {
 		this.h = h;
 		this.v = v;
 		curState = initialState;
 		curEvents = new ArrayList<VisualGameEvent>();
+		queuedEvents = new ArrayDeque<VisualGameEvent>();
 		stateImg = null;
 		backImg = null;
 		wasVisualising = false;
 		endGameEventSeen = false;
+		curTurn = 0;
+		markingTurn = 0;
 	}
 
 	@Override
@@ -43,7 +52,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 	}
 
 	@Override
-	public void getVisualisation(Graphics g, int width, int height) {
+	public synchronized void getVisualisation(Graphics g, int width, int height) {
 		// We first paint the background
 		if (backImg == null) {
 			handleWindowResize(width, height);
@@ -57,22 +66,24 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		g.drawImage(stateImg, 0, 0, width, height, null);
 
 		// Finally, paint the events ontop
+		v.animateEvents(curState, curEvents, width, height, (Graphics2D) g);
+		// Now fix up events
+		List<VisualGameEvent> newEvents = new ArrayList<>();
 		boolean stateChanged = false;
-		synchronized (curEvents) {
-			v.animateEvents(curState, curEvents, width, height, (Graphics2D) g);
-			// Now fix up events
-			List<VisualGameEvent> newEvents = new ArrayList<>();
-			for (VisualGameEvent e : curEvents) {
-				e.curFrame++;
-				if (e.curFrame == e.totalFrames) {
-					v.eventEnded(e, curState);
-					stateChanged = true;
-				} else {
-					newEvents.add(e);
+		for (VisualGameEvent e : curEvents) {
+			e.curFrame++;
+			if (e.curFrame == e.totalFrames) {
+				v.eventEnded(e, curState);
+				stateChanged = true;
+				if (e instanceof EndTurnEvent) {
+					curTurn++;
 				}
+			} else {
+				newEvents.add(e);
 			}
-			curEvents = newEvents;
 		}
+		curEvents = newEvents;
+		moveTurnsToCur();
 		if (stateChanged) {
 			redrawState(width, height);
 		}
@@ -80,7 +91,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 	}
 
 	@Override
-	public void handleWindowResize(int width, int height) {
+	public synchronized void handleWindowResize(int width, int height) {
 		BufferedImage newBackImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
 		Graphics2D g = newBackImg.createGraphics();
 		v.generateBackground(curState, width, height, g);
@@ -88,9 +99,9 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		redrawState(width, height);
 		backImg = newBackImg;
 	}
-	
+
 	@Override
-	public void windowClosed() {
+	public synchronized void windowClosed() {
 		wasVisualising = false;
 	}
 
@@ -107,25 +118,34 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		stateImg = newStateImg;
 	}
 
-	public void giveEvents(List<VisualGameEvent> events) {
+	public synchronized void giveEvents(List<VisualGameEvent> events) {
 		for (VisualGameEvent e : events) {
 			giveEvent(e);
 		}
 	}
 
-	public void giveEvent(VisualGameEvent ev) {
+	public synchronized void giveEvent(VisualGameEvent ev) {
 		if (ev instanceof EndGameEvent) {
 			endGameEventSeen = true;
 			return;
 		}
-		v.eventCreated(ev);
-		ev.curFrame = 0;
-		synchronized (curEvents) {
+		ev.turn = markingTurn;
+		if (ev instanceof EndTurnEvent) {
+			markingTurn++;
+		}
+		moveTurnsToCur();
+	}
+	
+	private void moveTurnsToCur() {
+		while (queuedEvents.size() > 0 && queuedEvents.peek().turn <= curTurn) {
+			VisualGameEvent ev = queuedEvents.poll();
+			v.eventCreated(ev);
+			ev.curFrame = 0;
 			curEvents.add(ev);
 		}
 	}
 
-	public S getCurState() {
+	public synchronized S getCurState() {
 		return curState;
 	}
 
@@ -134,11 +154,11 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		return h.getResults();
 	}
 
-	public boolean finishedVisualising() {
+	public synchronized boolean finishedVisualising() {
 		return curEvents.size() == 0 && endGameEventSeen;
 	}
 
-	public boolean isVisualising() {
+	public synchronized boolean isVisualising() {
 		return wasVisualising;
 	}
 }
