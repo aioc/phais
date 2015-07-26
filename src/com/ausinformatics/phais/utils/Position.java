@@ -2,14 +2,14 @@ package com.ausinformatics.phais.utils;
 
 public class Position {
 
-	public static int UP = 0;
-	public static int RIGHT = 1;
-	public static int DOWN = 2;
-	public static int LEFT = 3;
+	public final static int UP = 0;
+	public final static int RIGHT = 1;
+	public final static int DOWN = 2;
+	public final static int LEFT = 3;
 	
-	public int r, c;
-	public static final int[] dx = { 0, 1, 0, -1 };
-	public static final int[] dy = { -1, 0, 1, 0 };
+	public final int r, c;
+	public final static int[] dx = { 0, 1, 0, -1 };
+	public final static int[] dy = { -1, 0, 1, 0 };
 
 	public Position(int r, int c) {
 		this.r = r;
