@@ -90,4 +90,27 @@ public class VisualisationUtils {
                 b.top + (b.height + (int) (0.5 * fR.getHeight())) / 2);
     }
 
+    /* TODO (bgbn) this shouldn't need boardBoxes */
+    static public Box tweenMovement(BoxFactory f, final Box[][] boardBoxes, Position from, Position to, double progress, int borderOffset) {
+        int boxSize = boardBoxes[0][0].width;
+        Box b1 = boardBoxes[from.r + 1][from.c + 1];
+        Box b2 = boardBoxes[to.r + 1][to.c + 1];
+        Box b3 = f.fromPoints(Math.min(b1.left, b2.left),
+                Math.min(b1.top, b2.top),
+                Math.max(b1.right, b2.right),
+                Math.max(b1.bottom, b2.bottom));
+        Box b = f.fromPoints(b3.left + borderOffset, b3.top + borderOffset,
+                b3.right + borderOffset, b3.bottom + borderOffset);
+        int amoDiff = (int) (progress * boxSize);
+        if (from.c < to.c) {
+            b = f.fromDimensions(b.left + amoDiff, b.top, b.width - amoDiff, b.height);
+        } else if (from.c > to.c) {
+            b = f.fromDimensions(b.left, b.top, b.width - amoDiff, b.height);
+        } else if (from.r < to.r) {
+            b = f.fromDimensions(b.left, b.top + amoDiff, b.width, b.height - amoDiff);
+        } else {
+            b = f.fromDimensions(b.left, b.top, b.width, b.height - amoDiff);
+        }
+        return b;
+    }
 }
