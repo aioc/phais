@@ -120,18 +120,15 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 
 	public synchronized void giveEvents(List<VisualGameEvent> events) {
 		for (VisualGameEvent e : events) {
-			giveEvent(e);
-		}
-	}
-
-	public synchronized void giveEvent(VisualGameEvent ev) {
-		if (ev instanceof EndGameEvent) {
-			endGameEventSeen = true;
-			return;
-		}
-		ev.turn = markingTurn;
-		if (ev instanceof EndTurnEvent) {
-			markingTurn++;
+			if (e instanceof EndGameEvent) {
+				endGameEventSeen = true;
+				return;
+			}
+			e.turn = markingTurn;
+			queuedEvents.add(e);
+			if (e instanceof EndTurnEvent) {
+				markingTurn++;
+			}
 		}
 		moveTurnsToCur();
 	}
@@ -161,4 +158,5 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 	public synchronized boolean isVisualising() {
 		return wasVisualising;
 	}
+
 }
