@@ -135,7 +135,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		}
 		moveTurnsToCur();
 	}
-	
+
 	private void moveTurnsToCur() {
 		while (queuedEvents.size() > 0 && queuedEvents.peek().turn <= curTurn) {
 			VisualGameEvent ev = queuedEvents.poll();
