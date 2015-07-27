@@ -1,5 +1,6 @@
 package com.ausinformatics.phais.utils;
 
+
 public class Position {
 
 	public final static int UP = 0;
@@ -7,7 +8,6 @@ public class Position {
 	public final static int DOWN = 2;
 	public final static int LEFT = 3;
 	public final static int NO_MOVE = 4;
-
 	
 	public final int r, c;
 	public final static int[] dx = { 0, 1, 0, -1, 0 };
@@ -23,8 +23,13 @@ public class Position {
 		return new Position(r, c);
 	}
 	
-	public boolean equals(Position p) {
-		return p.r == r && p.c == c;
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Position) {
+			return ((Position)o).r == r && ((Position)o).c == c;
+		} else {
+			return false;
+		}
 	}
 	
 	public Position move(int dir) {
