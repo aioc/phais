@@ -29,10 +29,12 @@ public class GameVisualisation extends JPanel {
     private static final String DEFAULT_TITLE = "";
     private static final int DEFAULT_WIDTH = 1280;
     private static final int DEFAULT_HEIGHT = 800;
+    private static final int MSPF = 30;
 
     private GameInstance game;
     private JFrame theFrame;
     private boolean toClose;
+    private long preTime;
 
     public GameVisualisation() {
         String title = DEFAULT_TITLE;
@@ -63,6 +65,7 @@ public class GameVisualisation extends JPanel {
 
     @Override
     public void paintComponent(Graphics g) {
+        preTime = System.currentTimeMillis();
         super.paintComponent(g);
         // TODO (bgbn) make createCompatibleImage a library method somewhere
         // since we use it in a few places.
@@ -73,10 +76,18 @@ public class GameVisualisation extends JPanel {
         Graphics gg = backBuffer.getGraphics();
 
         game.getVisualisation(gg, getWidth(), getHeight());
+
+        while (System.currentTimeMillis() - preTime < MSPF) {
+            try {
+                Thread.sleep(2);
+            } catch (Exception e) {}
+        }
+
         if (!toClose) {
             g.drawImage(backBuffer, 0, 0, null);
             repaint();
         }
+
         gg.dispose();
     }
 
