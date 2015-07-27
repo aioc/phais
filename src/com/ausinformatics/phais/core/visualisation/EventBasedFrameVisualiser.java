@@ -98,7 +98,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
         GraphicsConfiguration gfx_config = GraphicsEnvironment.
             getLocalGraphicsEnvironment().getDefaultScreenDevice().
             getDefaultConfiguration();
-        BufferedImage newBackImg = gfx_config.createCompatibleImage(width, height);
+        BufferedImage newBackImg = gfx_config.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
 		Graphics2D g = newBackImg.createGraphics();
 		v.generateBackground(curState, width, height, g);
 		g.dispose();
