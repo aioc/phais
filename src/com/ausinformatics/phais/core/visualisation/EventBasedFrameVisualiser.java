@@ -5,6 +5,7 @@ import java.awt.Graphics2D;
 import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsEnvironment;
 import java.awt.Image;
+import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -114,7 +115,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
         GraphicsConfiguration gfx_config = GraphicsEnvironment.
             getLocalGraphicsEnvironment().getDefaultScreenDevice().
             getDefaultConfiguration();
-        BufferedImage newStateImg = gfx_config.createCompatibleImage(width, height, 255);
+        BufferedImage newStateImg = gfx_config.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
 		for (int i = 0; i < newStateImg.getHeight(); i++) {
 			for (int j = 0; j < newStateImg.getWidth(); j++) {
 				newStateImg.setRGB(j, i, 0x00000000);
