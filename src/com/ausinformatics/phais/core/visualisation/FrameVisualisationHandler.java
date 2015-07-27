@@ -9,7 +9,7 @@ public interface FrameVisualisationHandler<S> {
 	
 	void generateState(S state, int sWidth, int sHeight, Graphics2D g);
 	
-	void eventCreated(VisualGameEvent e);
+	void eventCreated(VisualGameEvent e, S state);
 	
 	void animateEvents(S state, List<VisualGameEvent> events, int sWidth, int sHeight, Graphics2D g);
 	

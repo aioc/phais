@@ -34,6 +34,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 
 	private int curTurn;
 	private int markingTurn;
+	private boolean shouldRedrawState;
 
 	public EventBasedFrameVisualiser(GameHandler h, FrameVisualisationHandler<S> v, S initialState) {
 		this.h = h;
@@ -47,6 +48,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		endGameEventSeen = false;
 		curTurn = 0;
 		markingTurn = 0;
+		shouldRedrawState = false;
 	}
 
 	@Override
@@ -72,12 +74,11 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		v.animateEvents(curState, curEvents, width, height, (Graphics2D) g);
 		// Now fix up events
 		List<VisualGameEvent> newEvents = new ArrayList<>();
-		boolean stateChanged = false;
 		for (VisualGameEvent e : curEvents) {
 			e.curFrame++;
 			if (e.curFrame == e.totalFrames) {
 				v.eventEnded(e, curState);
-				stateChanged = true;
+				shouldRedrawState = true;
 				if (e instanceof EndTurnEvent) {
 					curTurn++;
 				}
@@ -87,7 +88,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		}
 		curEvents = newEvents;
 		moveTurnsToCur();
-		if (stateChanged) {
+		if (shouldRedrawState) {
 			redrawState(width, height);
 		}
 		wasVisualising = true;
@@ -139,9 +140,10 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 	private void moveTurnsToCur() {
 		while (queuedEvents.size() > 0 && queuedEvents.peek().turn <= curTurn) {
 			VisualGameEvent ev = queuedEvents.poll();
-			v.eventCreated(ev);
+			v.eventCreated(ev, curState);
 			ev.curFrame = 0;
 			curEvents.add(ev);
+			shouldRedrawState = true;
 		}
 	}
 
