@@ -114,7 +114,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
         GraphicsConfiguration gfx_config = GraphicsEnvironment.
             getLocalGraphicsEnvironment().getDefaultScreenDevice().
             getDefaultConfiguration();
-        BufferedImage newStateImg = gfx_config.createCompatibleImage(width, height, 1);
+        BufferedImage newStateImg = gfx_config.createCompatibleImage(width, height, 255);
 		for (int i = 0; i < newStateImg.getHeight(); i++) {
 			for (int j = 0; j < newStateImg.getWidth(); j++) {
 				newStateImg.setRGB(j, i, 0x00000000);
