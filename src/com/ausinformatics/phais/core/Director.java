@@ -23,15 +23,16 @@ import com.ausinformatics.phais.core.scheduler.RoundRobinScheduler;
 import com.ausinformatics.phais.core.scorer.ScoreKeeper;
 import com.ausinformatics.phais.core.scorer.StandardScoreKeeper;
 import com.ausinformatics.phais.core.server.ClientConnection;
+import com.ausinformatics.phais.core.server.ClientRegister;
 import com.ausinformatics.phais.core.server.Server;
 
 // The game maker should create one of these, with the specified things.
 
-public class Director {
+public class Director implements ClientRegister {
 
 	private GameBuilder gBuilder;
 	private PlayerBuilder pBuilder;
-	
+
 	private Integer curID;
 	private Server server;
 	private GameScheduler scheduler;
@@ -43,7 +44,7 @@ public class Director {
 	private Map<GameRunner, Thread> runningGameThreads;
 
 	private Config config;
-	
+
 	private boolean running;
 
 	public Director(PlayerBuilder pBuilder, GameBuilder gBuilder) {
@@ -60,7 +61,7 @@ public class Director {
 	public boolean isRunning() {
 		return running;
 	}
-	
+
 	public void registerPlayer(ClientConnection p) {
 		int copiedID;
 		synchronized (curID) {
@@ -71,20 +72,24 @@ public class Director {
 		if (!newPlayer.getConnection().isConnected()) {
 			return;
 		}
-
-		synchronized (playerMap) {
-			while (playerMap.containsKey(newPlayer.getName())) {
-				newPlayer.generateNewName();
+		if (newPlayer.getName().equals("Spectator")) {
+			// It's a spectator.
+			
+		} else {
+			synchronized (playerMap) {
+				while (playerMap.containsKey(newPlayer.getName())) {
+					newPlayer.generateNewName();
+				}
+				playerMap.put(newPlayer.getName(), newPlayer);
 			}
-			playerMap.put(newPlayer.getName(), newPlayer);
+			synchronized (scheduler) {
+				scheduler.addPlayer(newPlayer);
+			}
+			synchronized (scoreKeeper) {
+				scoreKeeper.registerPlayer(newPlayer);
+			}
+			System.out.println("Player " + newPlayer.getName() + " added");
 		}
-		synchronized (scheduler) {
-	      scheduler.addPlayer(newPlayer);
-      }
-		synchronized (scoreKeeper) {
-	      scoreKeeper.registerPlayer(newPlayer);
-      }
-		System.out.println("Player " + newPlayer.getName() + " added");
 	}
 
 	public void deregisterPlayer(PersistentPlayer player) {
@@ -123,9 +128,9 @@ public class Director {
 			} else {
 				scheduler.addPlayer(p);
 			}
-		}	
+		}
 	}
-	
+
 	public void run(Config config) {
 		// First, create everything we need
 		this.config = config;
@@ -157,7 +162,7 @@ public class Director {
 					runningGameThreads.remove(g);
 
 					reschedulePlayers(g.getPlayers());
-					
+
 					scoreKeeper.submitGame(g.getResults());
 				}
 			}
@@ -183,12 +188,12 @@ public class Director {
 						} else {
 							newGameInstance = runnerGetter.getStandardRunner(toSpawn, players);
 						}
-						
+
 						runningGames.add(newGameInstance);
-						
+
 						Thread newThread = new Thread(newGameInstance);
 						runningGameThreads.put(newGameInstance, newThread);
-						
+
 						newThread.start();
 					}
 				} else {
@@ -198,7 +203,7 @@ public class Director {
 		}
 
 		cleanUp();
-		
+
 		System.out.println("Director exiting...");
 	}
 
@@ -213,24 +218,24 @@ public class Director {
 			// since we are stopping everything. This might not be true if games
 			// and players are held in some other object outside of Director,
 			// but for the purposes of PHAIS, this should never happen.
-			
+
 			// If things break, consider looking here.
 			t.stop();
 		}
 	}
-	
+
 	public Config getConfig() {
 		return config;
 	}
-	
+
 	public void updateConfig(Config config) {
 		this.config = config;
-		
+
 		// check that everything is as expected
 
 		GameScheduler newSch = null;
 		boolean scheChanged = false;
-		
+
 		if (scheduler.getMode() != config.mode || scheduler.getNumPlayersPerGame() != config.numPlayersPerGame) {
 			if (config.mode == Mode.RANDOM) {
 				newSch = new RandomScheduler(config.numPlayersPerGame);
@@ -255,7 +260,7 @@ public class Director {
 			}
 		}
 	}
-	
+
 	public Collection<PersistentPlayer> getPlayers() {
 		return playerMap.values();
 	}

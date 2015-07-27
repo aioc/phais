@@ -4,18 +4,16 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import com.ausinformatics.phais.core.Director;
-
 public class Server implements Runnable {
 
 	private ServerSocket socket;
 	private boolean running;
 	private int timeout;
-	private Director director;
+	private ClientRegister registar;
 
-	public Server(int port, int defaultTimeout, Director d) throws IOException {
+	public Server(int port, int defaultTimeout, ClientRegister registar) throws IOException {
 		timeout = defaultTimeout;
-		director = d;
+		this.registar = registar;
 		socket = new ServerSocket(port);
 		running = true;
 	}
@@ -25,7 +23,7 @@ public class Server implements Runnable {
 		while (running) {
 			try {
 				Socket connection = socket.accept();
-				new Thread(new NewConnectionHandler(connection, timeout, director)).start();
+				new Thread(new NewConnectionHandler(connection, timeout, registar)).start();
 				Thread.sleep(10);
 			} catch (Exception e) {
 				try {

@@ -21,6 +21,6 @@ public class Pair<F, S> {
 
 	@Override
 	public int hashCode() {
-		return first.hashCode() ^ second.hashCode();
+		return (first.hashCode() << 16) ^ second.hashCode();
 	}
 }
