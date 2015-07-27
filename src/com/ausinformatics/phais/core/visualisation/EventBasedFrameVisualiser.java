@@ -98,7 +98,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
         GraphicsConfiguration gfx_config = GraphicsEnvironment.
             getLocalGraphicsEnvironment().getDefaultScreenDevice().
             getDefaultConfiguration();
-        BufferedImage newBackImg = gfx_config.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
+        BufferedImage newBackImg = gfx_config.createCompatibleImage(width, height, Transparency.OPAQUE);
 		Graphics2D g = newBackImg.createGraphics();
 		v.generateBackground(curState, width, height, g);
 		g.dispose();
@@ -116,11 +116,6 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
             getLocalGraphicsEnvironment().getDefaultScreenDevice().
             getDefaultConfiguration();
         BufferedImage newStateImg = gfx_config.createCompatibleImage(width, height, Transparency.TRANSLUCENT);
-		for (int i = 0; i < newStateImg.getHeight(); i++) {
-			for (int j = 0; j < newStateImg.getWidth(); j++) {
-				newStateImg.setRGB(j, i, 0x00000000);
-			}
-		}
 		Graphics2D g = newStateImg.createGraphics();
 		v.generateState(curState, width, height, g);
 		g.dispose();
