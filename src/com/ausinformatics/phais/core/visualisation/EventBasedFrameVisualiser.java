@@ -2,6 +2,8 @@ package com.ausinformatics.phais.core.visualisation;
 
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsConfiguration;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
 import java.util.ArrayDeque;
@@ -92,7 +94,10 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 
 	@Override
 	public synchronized void handleWindowResize(int width, int height) {
-		BufferedImage newBackImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        GraphicsConfiguration gfx_config = GraphicsEnvironment.
+            getLocalGraphicsEnvironment().getDefaultScreenDevice().
+            getDefaultConfiguration();
+        BufferedImage newBackImg = gfx_config.createCompatibleImage(width, height);
 		Graphics2D g = newBackImg.createGraphics();
 		v.generateBackground(curState, width, height, g);
 		g.dispose();
@@ -106,7 +111,10 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 	}
 
 	private void redrawState(int width, int height) {
-		BufferedImage newStateImg = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+        GraphicsConfiguration gfx_config = GraphicsEnvironment.
+            getLocalGraphicsEnvironment().getDefaultScreenDevice().
+            getDefaultConfiguration();
+        BufferedImage newStateImg = gfx_config.createCompatibleImage(width, height, 1);
 		for (int i = 0; i < newStateImg.getHeight(); i++) {
 			for (int j = 0; j < newStateImg.getWidth(); j++) {
 				newStateImg.setRGB(j, i, 0x00000000);
@@ -157,5 +165,4 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 	public synchronized boolean isVisualising() {
 		return wasVisualising;
 	}
-
 }
