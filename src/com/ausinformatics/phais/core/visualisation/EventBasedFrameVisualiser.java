@@ -122,7 +122,6 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 		for (VisualGameEvent e : events) {
 			if (e instanceof EndGameEvent) {
 				endGameEventSeen = true;
-				return;
 			}
 			e.turn = markingTurn;
 			queuedEvents.add(e);
