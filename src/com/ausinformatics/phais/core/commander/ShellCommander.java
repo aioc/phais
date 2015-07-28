@@ -44,7 +44,6 @@ public class ShellCommander implements Commander {
 		commands.put("SCORES", new DisplayScores());
 		commands.put("FPSCOUNTER", new SetFPSCounter());
 		commands.put("QUIT", new Kill());
-		//TODO: Add round command for scheduling a round robin
 		
 		for (String s : gameCommands.keySet()) {
 			commands.put(s, gameCommands.get(s));
