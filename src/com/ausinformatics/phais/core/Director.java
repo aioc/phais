@@ -145,8 +145,12 @@ public class Director implements ClientRegister {
 		scoreKeeper = new StandardScoreKeeper();
 
 		// We now create the threads we need for various things
-		new Thread(server).start();
-		new Thread(commander).start();
+		Thread t = new Thread(server);
+		t.setName("Server listener");
+		t.start();
+		t = new Thread(commander);
+        t.setName("Command listener");
+        t.start();
 
 		while (running) {
 			try {
@@ -171,11 +175,13 @@ public class Director implements ClientRegister {
 			while (runningGames.size() < config.maxParallelGames && scheduler.hasGame()) {
 				List<PersistentPlayer> players = scheduler.getGame();
 				boolean incompleteGame = false;
+				String gameName = "Game between";
 				for (PersistentPlayer p : players) {
 					if (!p.getConnection().isConnected()) {
 						deregisterPlayer(p);
 						incompleteGame = true;
 					}
+					gameName += " " + p.getName();
 				}
 				if (!incompleteGame) {
 					GameInstance toSpawn = gBuilder.createGameInstance(players);
@@ -193,7 +199,7 @@ public class Director implements ClientRegister {
 
 						Thread newThread = new Thread(newGameInstance);
 						runningGameThreads.put(newGameInstance, newThread);
-
+						newThread.setName(gameName);
 						newThread.start();
 					}
 				} else {

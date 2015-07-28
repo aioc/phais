@@ -23,7 +23,7 @@ public class Server implements Runnable {
 		while (running) {
 			try {
 				Socket connection = socket.accept();
-				new Thread(new NewConnectionHandler(connection, timeout, registar)).start();
+				new NewConnectionHandler(connection, timeout, registar).start();
 				Thread.sleep(10);
 			} catch (Exception e) {
 				try {

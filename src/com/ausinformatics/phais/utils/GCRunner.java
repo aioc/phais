@@ -19,4 +19,10 @@ public class GCRunner implements Runnable {
             System.gc();
         }
     }
+    
+    public void start() {
+        Thread t = new Thread(this);
+        t.setName("GCRunner");
+        t.start();
+    }
 }
