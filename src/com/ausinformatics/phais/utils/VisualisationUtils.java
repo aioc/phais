@@ -6,6 +6,8 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
+import java.util.HashMap;
+import java.util.Map;
 
 public class VisualisationUtils {
 		static public class Box {
@@ -61,8 +63,16 @@ public class VisualisationUtils {
 				return new Box(t, l, r, t + height);
 			}
 		}
+		
+		private static Map<Pair<Pair<Integer, Integer>, Integer>, Font> cachedFonts = new HashMap<>();
 
 		static Font getLargestFittingFont(Font f, Box b, Graphics2D g, String s, int largestSize) {
+		    Pair<Pair<Integer, Integer>, Integer> key = new Pair<Pair<Integer,Integer>, Integer>(new Pair<Integer, Integer>(b.width, b.height), largestSize);
+		    synchronized (cachedFonts) {
+		        if (cachedFonts.containsKey(key)) {
+		            return cachedFonts.get(key);
+		        }
+            }
 			int minSize = 1;
 			int maxSize = largestSize;
 			while (minSize < maxSize) {
@@ -76,7 +86,11 @@ public class VisualisationUtils {
 						maxSize = midSize - 1;
 				}
 			}
-			return f.deriveFont(minSize);
+			Font res = f.deriveFont(minSize);
+			 synchronized (cachedFonts) {
+			     cachedFonts.put(key, res);
+			 }
+			return res;
 		}
 
 		static public void drawString(Graphics2D g, Box b, Font rootFont, String text, Color c) {
