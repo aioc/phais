@@ -17,6 +17,7 @@ import com.ausinformatics.phais.server.commander.commands.ScheduleGame;
 import com.ausinformatics.phais.server.commander.commands.SchedulePause;
 import com.ausinformatics.phais.server.commander.commands.ScheduleRandom;
 import com.ausinformatics.phais.server.commander.commands.ScheduleRoundRobin;
+import com.ausinformatics.phais.server.commander.commands.SetFPSCounter;
 import com.ausinformatics.phais.server.commander.commands.SetVisualiser;
 
 public class ShellCommander implements Commander {
@@ -41,8 +42,8 @@ public class ShellCommander implements Commander {
 		commands.put("PLAY", new ScheduleGame());
 		commands.put("VIS", new SetVisualiser());
 		commands.put("SCORES", new DisplayScores());
+		commands.put("FPSCOUNTER", new SetFPSCounter());
 		commands.put("QUIT", new Kill());
-		//TODO: Add round command for scheduling a round robin
 		
 		for (String s : gameCommands.keySet()) {
 			commands.put(s, gameCommands.get(s));
