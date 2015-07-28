@@ -32,8 +32,8 @@ public class GameVisualisation extends JPanel implements ActionListener {
     private static final String DEFAULT_TITLE = "";
     private static final int DEFAULT_WIDTH = 1280;
     private static final int DEFAULT_HEIGHT = 800;
-    private static final int FPS = 30;
-    private static final boolean CALCFPS = false;
+    private static final int FPS = 1000;
+    public static boolean CALCFPS = false;
 
     private GameInstance game;
     private JFrame theFrame;

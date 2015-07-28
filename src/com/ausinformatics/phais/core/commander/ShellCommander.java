@@ -17,6 +17,7 @@ import com.ausinformatics.phais.core.commander.commands.ScheduleGame;
 import com.ausinformatics.phais.core.commander.commands.SchedulePause;
 import com.ausinformatics.phais.core.commander.commands.ScheduleRandom;
 import com.ausinformatics.phais.core.commander.commands.ScheduleRoundRobin;
+import com.ausinformatics.phais.core.commander.commands.SetFPSCounter;
 import com.ausinformatics.phais.core.commander.commands.SetVisualiser;
 
 public class ShellCommander implements Commander {
@@ -41,6 +42,7 @@ public class ShellCommander implements Commander {
 		commands.put("PLAY", new ScheduleGame());
 		commands.put("VIS", new SetVisualiser());
 		commands.put("SCORES", new DisplayScores());
+		commands.put("FPSCOUNTER", new SetFPSCounter());
 		commands.put("QUIT", new Kill());
 		//TODO: Add round command for scheduling a round robin
 		
