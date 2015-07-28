@@ -96,6 +96,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 
 	@Override
 	public synchronized void handleWindowResize(int width, int height) {
+	    backImg = null;
         GraphicsConfiguration gfx_config = GraphicsEnvironment.
             getLocalGraphicsEnvironment().getDefaultScreenDevice().
             getDefaultConfiguration();
@@ -113,6 +114,7 @@ public class EventBasedFrameVisualiser<S> implements GameInstance {
 	}
 
 	private void redrawState(int width, int height) {
+	    stateImg = null;
         GraphicsConfiguration gfx_config = GraphicsEnvironment.
             getLocalGraphicsEnvironment().getDefaultScreenDevice().
             getDefaultConfiguration();

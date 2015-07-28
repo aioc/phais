@@ -76,7 +76,8 @@ public class GameVisualisation extends JPanel {
         Graphics gg = backBuffer.getGraphics();
 
         game.getVisualisation(gg, getWidth(), getHeight());
-
+        gg.dispose();
+        System.gc();
         while (System.currentTimeMillis() - preTime < MSPF) {
             try {
                 Thread.sleep(2);
@@ -88,7 +89,6 @@ public class GameVisualisation extends JPanel {
             repaint();
         }
 
-        gg.dispose();
     }
 
     private void handleWindowResize() {
