@@ -1,10 +1,10 @@
 package com.ausinformatics.phais.server.interfaces;
 
-import java.awt.Graphics;
 import java.util.Map;
 
 /**
- * This interface needs to be implemented by the game maker.
+ * This interface can be implemented by the game maker, when visualisation is
+ * handled by another visualisation program
  * <p />
  * Used to represent the entirety of a game instance, including the game state,
  * the main game loop, victory and defeat conditions, etc.
@@ -22,32 +22,6 @@ public interface GameInstance {
 	public void begin();
 
 	/**
-	 * This method should return an Image visualisation of the game. If there is
-	 * nothing to display (or visualisation of the game has not been
-	 * implemented), this should return null.
-	 * @param g The java.awt.Graphics context to draw into 
-	 * @param width The width of the drawing context
-	 * @param height The height of the drawing context
-	 * 
-	 * @return an Image representing the game state; <code>null</code> if there is nothing to
-	 *         display (or if unimplemented)
-	 */
-	public void getVisualisation(Graphics g, int width, int height);
-
-	/**
-	 * This method should do any bookkeeping required to handle a window
-	 * resize event.
-	 * @param width The width of the drawing context.
-	 * @param height The height of the drawing context.
-	 */
-	public void handleWindowResize(int width, int height);
-	
-	/**
-	 * This gets called whenever the visualising window gets closed
-	 */
-	public void windowClosed();
-
-	/**
 	 * This method should return a map of PersistentPlayers to an integer score.
 	 * There should be an entry for every player in the game.
 	 * <p />
@@ -57,5 +31,4 @@ public interface GameInstance {
 	 * @return a map of players to their respective scores
 	 */
 	public Map<PersistentPlayer, Integer> getResults();
-
 }

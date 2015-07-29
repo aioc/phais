@@ -3,11 +3,13 @@ package com.ausinformatics.phais.server.runner;
 import java.util.List;
 import java.util.Map;
 
-import com.ausinformatics.phais.server.interfaces.GameInstance;
 import com.ausinformatics.phais.server.interfaces.PersistentPlayer;
+import com.ausinformatics.phais.server.spectators.Spectator;
 
-public interface GameRunner extends Runnable {
+public interface GameRunner{
 
+    public void start(String name);
+    
 	/**
 	 * Returns if the game is finished or not
 	 * 
@@ -22,6 +24,8 @@ public interface GameRunner extends Runnable {
 	 */
 	public List<PersistentPlayer> getPlayers();
 
+    public List<Spectator> getSpectators();
+
 	/**
 	 * Returns a mapping of players to scores. Scores may be negative. This
 	 * method will only be called if isFinished() returns true
@@ -29,18 +33,4 @@ public interface GameRunner extends Runnable {
 	 * @return the mapping
 	 */
 	public Map<PersistentPlayer, Integer> getResults();
-	
-	/**
-	 * Returns whether you can restart the game with this runner
-	 * @return if you can restart the game
-	 */
-	public boolean canRestart();
-	
-	/**
-	 * Restarts the runner with a new game
-	 * @param game the game that is to be run
-	 * @param players the players in the game
-	 */
-	public void restart(GameInstance game, List<PersistentPlayer> players);
-
 }

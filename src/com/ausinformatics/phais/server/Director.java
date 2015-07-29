@@ -7,9 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ausinformatics.phais.common.commander.Commander;
+import com.ausinformatics.phais.common.commander.ShellCommander;
+import com.ausinformatics.phais.common.events.NetworkEventSender;
 import com.ausinformatics.phais.server.Config.Mode;
-import com.ausinformatics.phais.server.commander.Commander;
-import com.ausinformatics.phais.server.commander.ShellCommander;
+import com.ausinformatics.phais.server.interfaces.EventManager;
 import com.ausinformatics.phais.server.interfaces.GameBuilder;
 import com.ausinformatics.phais.server.interfaces.GameInstance;
 import com.ausinformatics.phais.server.interfaces.PersistentPlayer;
@@ -17,261 +19,312 @@ import com.ausinformatics.phais.server.interfaces.PlayerBuilder;
 import com.ausinformatics.phais.server.runner.GameRunner;
 import com.ausinformatics.phais.server.runner.RunnerFactory;
 import com.ausinformatics.phais.server.scheduler.GameScheduler;
+import com.ausinformatics.phais.server.scheduler.MaximisingSpectatorScheduler;
 import com.ausinformatics.phais.server.scheduler.PauseScheduler;
 import com.ausinformatics.phais.server.scheduler.RandomScheduler;
 import com.ausinformatics.phais.server.scheduler.RoundRobinScheduler;
+import com.ausinformatics.phais.server.scheduler.SpectatorScheduler;
 import com.ausinformatics.phais.server.scorer.ScoreKeeper;
 import com.ausinformatics.phais.server.scorer.StandardScoreKeeper;
 import com.ausinformatics.phais.server.server.ClientConnection;
 import com.ausinformatics.phais.server.server.ClientRegister;
+import com.ausinformatics.phais.server.server.DisconnectedException;
 import com.ausinformatics.phais.server.server.Server;
+import com.ausinformatics.phais.server.spectators.Spectator;
+import com.ausinformatics.phais.server.spectators.SpectatorFactory;
+import com.ausinformatics.phais.server.spectators.StandardSpecatorFactory;
 
 // The game maker should create one of these, with the specified things.
 
 public class Director implements ClientRegister {
 
-	private GameBuilder gBuilder;
-	private PlayerBuilder pBuilder;
+    private GameBuilder gBuilder;
+    private PlayerBuilder pBuilder;
+    
+    private EventManager eventManager;
+    
+    private SpectatorFactory sFactory;
 
-	private Integer curID;
-	private Server server;
-	private GameScheduler scheduler;
-	private Commander commander;
-	private ScoreKeeper scoreKeeper;
-	private RunnerFactory runnerGetter;
-	private Map<String, PersistentPlayer> playerMap;
-	private Set<GameRunner> runningGames;
-	private Map<GameRunner, Thread> runningGameThreads;
+    private Integer curGameID;
+    private Server server;
+    private GameScheduler scheduler;
+    private SpectatorScheduler spectatorScheduler;
+    private Commander commander;
+    private ScoreKeeper scoreKeeper;
+    private RunnerFactory runnerGetter;
+    private Map<String, PersistentPlayer> playerMap;
+    private Set<GameRunner> runningGames;
 
-	private Config config;
+    private Config config;
 
-	private boolean running;
+    private boolean running;
 
-	public Director(PlayerBuilder pBuilder, GameBuilder gBuilder) {
-		this.pBuilder = pBuilder;
-		this.gBuilder = gBuilder;
-		runnerGetter = new RunnerFactory();
-		playerMap = new HashMap<String, PersistentPlayer>();
-		runningGames = new HashSet<GameRunner>();
-		runningGameThreads = new HashMap<GameRunner, Thread>();
-		curID = 0;
-		running = true;
-	}
+    public Director(PlayerBuilder pBuilder, GameBuilder gBuilder, EventManager eventManger) {
+        this.pBuilder = pBuilder;
+        this.gBuilder = gBuilder;
+        this.eventManager = eventManger;
+        sFactory = new StandardSpecatorFactory();
+        runnerGetter = new RunnerFactory();
+        playerMap = new HashMap<String, PersistentPlayer>();
+        runningGames = new HashSet<GameRunner>();
+        curGameID = 0;
+        running = true;
+    }
 
-	public boolean isRunning() {
-		return running;
-	}
+    public boolean isRunning() {
+        return running;
+    }
 
-	public void registerPlayer(ClientConnection p) {
-		int copiedID;
-		synchronized (curID) {
-			copiedID = curID;
-			curID++;
-		}
-		PersistentPlayer newPlayer = pBuilder.createPlayer(copiedID, p);
-		if (!newPlayer.getConnection().isConnected()) {
-			return;
-		}
-		if (newPlayer.getName().equals("Spectator")) {
-			// It's a spectator.
-			
-		} else {
-			synchronized (playerMap) {
-				while (playerMap.containsKey(newPlayer.getName())) {
-					newPlayer.generateNewName();
-				}
-				playerMap.put(newPlayer.getName(), newPlayer);
-			}
-			synchronized (scheduler) {
-				scheduler.addPlayer(newPlayer);
-			}
-			synchronized (scoreKeeper) {
-				scoreKeeper.registerPlayer(newPlayer);
-			}
-			System.out.println("Player " + newPlayer.getName() + " added");
-		}
-	}
+    public void registerPlayer(ClientConnection p) {
+        int copiedID;
+        synchronized (curGameID) {
+            copiedID = curGameID;
+            curGameID++;
+        }
+        // Check if they are a player or spectator.
+        try {
+            String token = p.getStrInput();
+            if (token.equals("spectator")) {
+                Spectator s = sFactory.makeSpectator(copiedID, p);
+                if (!s.getConnection().isConnected()) {
+                    return;
+                }
+                synchronized (spectatorScheduler) {
+                    spectatorScheduler.addSpectator(s);
+                }
+                return;
+            }
+        } catch (DisconnectedException e) {
+            return;
+        }
 
-	public void deregisterPlayer(PersistentPlayer player) {
-		// FLUSH THEM FROM EXISTENCE
-		// TODO make sure this doesn't interfere with games currently running
-		scheduler.removePlayer(player);
-		playerMap.remove(player.getName());
-		scoreKeeper.deregisterPlayer(player);
-		player.getConnection().disconnect();
-	}
+        PersistentPlayer newPlayer = pBuilder.createPlayer(copiedID, p);
+        if (!newPlayer.getConnection().isConnected()) {
+            return;
+        }
+        synchronized (playerMap) {
+            while (playerMap.containsKey(newPlayer.getName())) {
+                newPlayer.generateNewName();
+            }
+            playerMap.put(newPlayer.getName(), newPlayer);
+        }
+        synchronized (scheduler) {
+            scheduler.addPlayer(newPlayer);
+        }
+        synchronized (scoreKeeper) {
+            scoreKeeper.registerPlayer(newPlayer);
+        }
+        System.out.println("Player " + newPlayer.getName() + " added");
+    }
 
-	public PersistentPlayer getPlayerFromName(String name) {
-		return playerMap.get(name);
-	}
+    public void deregisterPlayer(PersistentPlayer player) {
+        // FLUSH THEM FROM EXISTENCE
+        // TODO make sure this doesn't interfere with games currently running
+        synchronized (scheduler) {
+            scheduler.removePlayer(player);
+        }
+        synchronized (playerMap) {
+            playerMap.remove(player.getName());
+        }
+        synchronized (scheduler) {
+            scoreKeeper.deregisterPlayer(player);
+        }
+        player.getConnection().disconnect();
+    }
 
-	public Map<PersistentPlayer, Integer> getScores() {
-		Map<PersistentPlayer, Integer> ret = new HashMap<PersistentPlayer, Integer>();
-		for (PersistentPlayer p : playerMap.values()) {
-			ret.put(p, scoreKeeper.getScore(p));
-		}
-		return ret;
-	}
+    public PersistentPlayer getPlayerFromName(String name) {
+        synchronized (playerMap) {
+            return playerMap.get(name);
+        }
+    }
 
-	public void addGameToQueue(List<PersistentPlayer> players) {
-		synchronized (scheduler) {
-			scheduler.scheduleGame(players);
-		}
-	}
+    public Map<PersistentPlayer, Integer> getScores() {
+        Map<PersistentPlayer, Integer> ret = new HashMap<PersistentPlayer, Integer>();
+        synchronized (playerMap) {
+            for (PersistentPlayer p : playerMap.values()) {
+                ret.put(p, scoreKeeper.getScore(p));
+            }
+        }
+        return ret;
+    }
 
-	private void reschedulePlayers(List<PersistentPlayer> players) {
-		for (PersistentPlayer p : players) {
-			// do stuff
-			if (!p.getConnection().isConnected()) {
-				// player has disconnected
-				deregisterPlayer(p);
-			} else {
-				scheduler.addPlayer(p);
-			}
-		}
-	}
+    public void addGameToQueue(List<PersistentPlayer> players) {
+        synchronized (scheduler) {
+            scheduler.scheduleGame(players);
+        }
+    }
 
-	public void run(Config config) {
-		// First, create everything we need
-		this.config = config;
-		try {
-			server = new Server(config.port, config.timeout, this);
-		} catch (Exception e) {
-			System.out.println("Could not open server connection: " + e.getMessage());
-			System.exit(1);
-		}
-		scheduler = new RandomScheduler(config.numPlayersPerGame);
-		commander = new ShellCommander(this, config.gameCommands);
-		scoreKeeper = new StandardScoreKeeper();
+    private void reschedulePlayers(List<PersistentPlayer> players) {
+        synchronized (scheduler) {
+            for (PersistentPlayer p : players) {
+                // do stuff
+                if (!p.getConnection().isConnected()) {
+                    // player has disconnected
+                    deregisterPlayer(p);
+                } else {
+                    scheduler.addPlayer(p);
+                }
+            }
+        }
+    }
+    
+    private void rescheduleSpectators(List<Spectator> spectators) {
+        synchronized (spectatorScheduler) {
+            for (Spectator s : spectators) {
+                if (!s.getConnection().isConnected()) {
+                    spectatorScheduler.removeSpectator(s);
+                } else {
+                    spectatorScheduler.addSpectator(s);
+                }
+            }
+        }
+    }
 
-		// We now create the threads we need for various things
-		Thread t = new Thread(server);
-		t.setName("Server listener");
-		t.start();
-		t = new Thread(commander);
+    public void run(Config config) {
+        // First, create everything we need
+        this.config = config;
+        try {
+            server = new Server(config.port, config.timeout, this);
+        } catch (Exception e) {
+            System.out.println("Could not open server connection: " + e.getMessage());
+            System.exit(1);
+        }
+        scheduler = new RandomScheduler(config.numPlayersPerGame);
+        spectatorScheduler = new MaximisingSpectatorScheduler();
+        commander = new ShellCommander(this, config.gameCommands);
+        scoreKeeper = new StandardScoreKeeper();
+        
+        // TODO: Create spectator scheduler and factory.
+
+        // We now create the threads we need for various things
+        Thread t = new Thread(server);
+        t.setName("Server listener");
+        t.start();
+        t = new Thread(commander);
         t.setName("Command listener");
         t.start();
 
-		while (running) {
-			try {
-				Thread.sleep(10);
-			} catch (InterruptedException e) {
-				System.out.println("This should never happen.");
-				e.printStackTrace();
-			}
-			// finish all running games
-			for (GameRunner g : runningGames.toArray(new GameRunner[0])) {
-				if (g.isFinished()) {
-					runningGames.remove(g);
-					runningGameThreads.remove(g);
+        while (running) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+                System.out.println("This should never happen.");
+                e.printStackTrace();
+            }
+            // finish all running games
+            synchronized (runningGames) {
+                for (GameRunner g : runningGames.toArray(new GameRunner[0])) {
+                    if (g.isFinished()) {
+                        runningGames.remove(g);
 
-					reschedulePlayers(g.getPlayers());
+                        reschedulePlayers(g.getPlayers());
+                        rescheduleSpectators(g.getSpectators());
 
-					scoreKeeper.submitGame(g.getResults());
-				}
-			}
+                        synchronized (scoreKeeper) {
+                            scoreKeeper.submitGame(g.getResults());
+                        }
+                    }
+                }
+            }
 
-			// put together games, run them (in parallel if desired)
-			while (runningGames.size() < config.maxParallelGames && scheduler.hasGame()) {
-				List<PersistentPlayer> players = scheduler.getGame();
-				boolean incompleteGame = false;
-				String gameName = "Game between";
-				for (PersistentPlayer p : players) {
-					if (!p.getConnection().isConnected()) {
-						deregisterPlayer(p);
-						incompleteGame = true;
-					}
-					gameName += " " + p.getName();
-				}
-				if (!incompleteGame) {
-					GameInstance toSpawn = gBuilder.createGameInstance(players);
-					if (toSpawn == null) {
-						reschedulePlayers(players);
-					} else {
-						GameRunner newGameInstance;
-						if (config.visualise) {
-							newGameInstance = runnerGetter.getVisualRunner(toSpawn, players);
-						} else {
-							newGameInstance = runnerGetter.getStandardRunner(toSpawn, players);
-						}
+            // put together games, run them (in parallel if desired)
+            while (runningGames.size() < config.maxParallelGames && scheduler.hasGame()) {
+                List<PersistentPlayer> players = null;
+                synchronized (scheduler) {
+                    players = scheduler.getGame();
+                }
+                boolean incompleteGame = false;
+                String gameName = "Game between";
+                for (PersistentPlayer p : players) {
+                    if (!p.getConnection().isConnected()) {
+                        incompleteGame = true;
+                    }
+                    gameName += " " + p.getName();
+                }
+                List<Spectator> spectators = null;
+                synchronized (spectatorScheduler) {
+                    spectators = spectatorScheduler.addToGame(players);
+                }
+                for (Spectator s : spectators) {
+                    if (!s.getConnection().isConnected()) {
+                        incompleteGame = true;
+                    }
+                }
+                if (!incompleteGame) {
+                    NetworkEventSender nes = new NetworkEventSender(spectators, eventManager);
+                    GameInstance toSpawn = gBuilder.createGameInstance(players, nes);
+                    if (toSpawn == null) {
+                        reschedulePlayers(players);
+                        rescheduleSpectators(spectators);
+                    } else {
+                        GameRunner newGameInstance;
+                        newGameInstance = runnerGetter.getStandardRunner(toSpawn, players, spectators, nes);
 
-						runningGames.add(newGameInstance);
+                        runningGames.add(newGameInstance);
+                        newGameInstance.start(gameName);
+                    }
+                } else {
+                    reschedulePlayers(players);
+                    rescheduleSpectators(spectators);
+                }
+            }
+        }
 
-						Thread newThread = new Thread(newGameInstance);
-						runningGameThreads.put(newGameInstance, newThread);
-						newThread.setName(gameName);
-						newThread.start();
-					}
-				} else {
-					reschedulePlayers(players);
-				}
-			}
-		}
+        cleanUp();
 
-		cleanUp();
+        System.out.println("Director exiting...");
+    }
 
-		System.out.println("Director exiting...");
-	}
+    private void cleanUp() {
+        server.kill();
+        for (PersistentPlayer p : playerMap.values()) {
+            p.getConnection().disconnect();
+        }
 
-	@SuppressWarnings("deprecation")
-	private void cleanUp() {
-		server.kill();
-		for (PersistentPlayer p : playerMap.values()) {
-			p.getConnection().disconnect();
-		}
-		for (Thread t : runningGameThreads.values()) {
-			// Any objects that would be corrupted by t.stop() wouldn't matter,
-			// since we are stopping everything. This might not be true if games
-			// and players are held in some other object outside of Director,
-			// but for the purposes of PHAIS, this should never happen.
+    }
 
-			// If things break, consider looking here.
-			t.stop();
-		}
-	}
+    public Config getConfig() {
+        return config;
+    }
 
-	public Config getConfig() {
-		return config;
-	}
+    public void updateConfig(Config config) {
+        this.config = config;
 
-	public void updateConfig(Config config) {
-		this.config = config;
+        // check that everything is as expected
 
-		// check that everything is as expected
+        GameScheduler newSch = null;
+        boolean scheChanged = false;
 
-		GameScheduler newSch = null;
-		boolean scheChanged = false;
+        if (scheduler.getMode() != config.mode || scheduler.getNumPlayersPerGame() != config.numPlayersPerGame) {
+            if (config.mode == Mode.RANDOM) {
+                newSch = new RandomScheduler(config.numPlayersPerGame);
+            } else if (config.mode == Mode.ROUND_ROBIN) {
+                newSch = new RoundRobinScheduler();
+            } else if (config.mode == Mode.PAUSE) {
+                newSch = new PauseScheduler();
+            }
+            scheChanged = true;
+        }
+        if (scheChanged) {
+            // TODO swap out the schedulers
+            GameScheduler oldSch = scheduler;
+            // Switch out now
+            synchronized (scheduler) {
+                scheduler = newSch;
+            }
+            // Add all the players into it
+            List<PersistentPlayer> waiting = oldSch.removeWaitingPlayers();
+            for (PersistentPlayer p : waiting) {
+                scheduler.addPlayer(p);
+            }
+        }
+    }
 
-		if (scheduler.getMode() != config.mode || scheduler.getNumPlayersPerGame() != config.numPlayersPerGame) {
-			if (config.mode == Mode.RANDOM) {
-				newSch = new RandomScheduler(config.numPlayersPerGame);
-			} else if (config.mode == Mode.ROUND_ROBIN) {
-				newSch = new RoundRobinScheduler();
-			} else if (config.mode == Mode.PAUSE) {
-				newSch = new PauseScheduler();
-			}
-			scheChanged = true;
-		}
-		if (scheChanged) {
-			// TODO swap out the schedulers
-			GameScheduler oldSch = scheduler;
-			// Switch out now
-			synchronized (scheduler) {
-				scheduler = newSch;
-			}
-			// Add all the players into it
-			List<PersistentPlayer> waiting = oldSch.removeWaitingPlayers();
-			for (PersistentPlayer p : waiting) {
-				scheduler.addPlayer(p);
-			}
-		}
-	}
+    public Collection<PersistentPlayer> getPlayers() {
+        return playerMap.values();
+    }
 
-	public Collection<PersistentPlayer> getPlayers() {
-		return playerMap.values();
-	}
-
-	public void kill() {
-		running = false;
-	}
+    public void kill() {
+        running = false;
+    }
 }

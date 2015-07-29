@@ -2,6 +2,8 @@ package com.ausinformatics.phais.server.interfaces;
 
 import java.util.List;
 
+import com.ausinformatics.phais.common.events.EventReceiver;
+
 /**
  * This interface needs to be implemented by the game maker.
  * <p />
@@ -36,6 +38,6 @@ public interface GameBuilder {
 	 * @return a GameInstance with the given players. null if the game is to be
 	 *         disregarded.
 	 */
-	public GameInstance createGameInstance(List<PersistentPlayer> players);
+	public GameInstance createGameInstance(List<PersistentPlayer> players, EventReceiver eventReceiver);
 
 }

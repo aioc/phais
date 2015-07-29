@@ -3,7 +3,7 @@ package com.ausinformatics.phais.server;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.ausinformatics.phais.server.commander.commands.Command;
+import com.ausinformatics.phais.common.commander.Command;
 
 public class Config {
 

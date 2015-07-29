@@ -3,7 +3,7 @@ package com.ausinformatics.phais.server.server;
 /**
  * Acts as an interface through which to communicate with the client.
  */
-public interface ClientConnection extends SpectatorConnection {
+public interface ClientConnection {
 
 	/**
 	 * Sends a string to the client
