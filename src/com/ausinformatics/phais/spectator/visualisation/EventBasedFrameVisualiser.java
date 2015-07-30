@@ -154,6 +154,7 @@ public class EventBasedFrameVisualiser<S> implements GameVisualiser, EventReceiv
 		}
 	}
 
+    @Override
 	public synchronized boolean finishedVisualising() {
 		return curEvents.size() == 0 && endGameEventSeen;
 	}

@@ -8,6 +8,9 @@ public class GCRunner implements Runnable {
     public void run() {
         while (true) {
             try {
+                if (timeout < 0) {
+                    break;
+                }
                 if (timeout == 0) {
                     Thread.sleep(10);
                     continue;

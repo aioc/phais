@@ -60,5 +60,7 @@ public interface ClientConnection {
 	 * @return true iff they are stilled connected after checking
 	 */
 	public boolean checkConnected();
+	
+	public String getAsync();
 
 }

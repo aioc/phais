@@ -2,7 +2,7 @@ package com.ausinformatics.phais.server.scheduler;
 
 import java.util.List;
 
-import com.ausinformatics.phais.server.Config.Mode;
+import com.ausinformatics.phais.common.Config.Mode;
 import com.ausinformatics.phais.server.interfaces.PersistentPlayer;
 
 /**

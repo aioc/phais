@@ -113,4 +113,13 @@ public class Client implements ClientConnection {
 		return con;
 	}
 
+    @Override
+    public String getAsync() {
+        if (input.inputAvailable()) {
+            return input.getInput();
+        } else {
+            return "";
+        }
+    }
+
 }

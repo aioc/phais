@@ -8,6 +8,7 @@ import com.ausinformatics.phais.server.server.SocketTransport;
 import com.ausinformatics.phais.spectator.interfaces.FrameVisualisationHandler;
 import com.ausinformatics.phais.spectator.interfaces.FrameVisualiserFactory;
 import com.ausinformatics.phais.spectator.visualisation.EventBasedFrameVisualiser;
+import com.ausinformatics.phais.spectator.visualisation.GameVisualisation;
 
 public class VisualiserDirector<S> {
 
@@ -40,14 +41,16 @@ public class VisualiserDirector<S> {
             System.out.println("Could not read: " + e.getMessage());
             return;
         }
+        GameVisualisation gv = new GameVisualisation();
         while (true) {
             FrameVisualisationHandler<S> handler = factory.createHandler();
             EventBasedFrameVisualiser<S> vis = new EventBasedFrameVisualiser<>(handler);
             NetworkVisualiser nv = new NetworkVisualiser(em, vis, vis);
             try {
-                nv.start(st);
+                nv.start(st, gv);
             } catch (IOException e) {
                 System.out.println("Error while processing game: " + e.getMessage());
+                return;
             }
         }
     }

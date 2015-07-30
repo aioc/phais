@@ -14,6 +14,8 @@ public interface Spectator {
     public String getName();
 
     public boolean shouldAddToGame(List<PersistentPlayer> players, List<Spectator> spectators);
+    
+    public void addedToGame();
 
     public ClientConnection getConnection();
 }

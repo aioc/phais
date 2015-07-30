@@ -13,22 +13,20 @@ import com.ausinformatics.phais.spectator.visualisation.GameVisualiser;
 
 public class NetworkVisualiser {
 
-    private GameVisualisation gv;
     private EventManager em;
     private EventReceiver er;
     private GameVisualiser vis;
-    
+
     public NetworkVisualiser(EventManager eventManager, EventReceiver eventReceiver, GameVisualiser visualiser) {
-        gv = new GameVisualisation();
         em = eventManager;
         er = eventReceiver;
         vis = visualiser;
     }
-    
-    public void start(SocketTransport st) throws IOException {
+
+    public void start(SocketTransport st, GameVisualisation gv) throws IOException {
         String line = st.read();
         if (!line.equals("BEGIN")) {
-            System.out.println("Did not get BEGIN... something may be wrong.");
+            System.out.println("Did not get BEGIN... something may be wrong: " + line);
             return;
         }
         gv.show(vis);
@@ -46,6 +44,18 @@ public class NetworkVisualiser {
             }
             er.giveEvents(events);
         }
+        System.out.println("Finsihed getting events...");
+        try {
+            while (!vis.finishedVisualising()) {
+                Thread.sleep(10);
+            }
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        System.out.println("Finsihed game!");
+        st.write("READY");
     }
-    
+
 }

@@ -36,7 +36,6 @@ public class GameVisualisation extends JPanel implements ActionListener {
 
     private GameVisualiser vis;
     private JFrame theFrame;
-    private boolean toClose;
     private Queue<Long> frames;
     private Timer gameDisplayer;
 
@@ -52,22 +51,21 @@ public class GameVisualisation extends JPanel implements ActionListener {
         theFrame.setUndecorated(false);
         theFrame.getContentPane().add(this);
         theFrame.setDefaultCloseOperation(JFrame.HIDE_ON_CLOSE);
-        toClose = false;
         theFrame.getRootPane().addComponentListener(new ComponentAdapter() {
             public void componentResized(ComponentEvent e) {
                 GameVisualisation.this.handleWindowResize();
             }
         });
-        
+
         theFrame.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
                 GameVisualisation.this.handleClosing();
             }
         });
-        
+
         gameDisplayer = new Timer(1000 / FPS, this);
-        
+
         frames = new ArrayDeque<>();
     }
 
@@ -76,9 +74,8 @@ public class GameVisualisation extends JPanel implements ActionListener {
         super.paintComponent(g);
         // TODO (bgbn) make createCompatibleImage a library method somewhere
         // since we use it in a few places.
-        GraphicsConfiguration gfx_config = GraphicsEnvironment.
-            getLocalGraphicsEnvironment().getDefaultScreenDevice().
-            getDefaultConfiguration();
+        GraphicsConfiguration gfx_config = GraphicsEnvironment.getLocalGraphicsEnvironment().getDefaultScreenDevice()
+                .getDefaultConfiguration();
         BufferedImage backBuffer = gfx_config.createCompatibleImage(getWidth(), getHeight(), Transparency.OPAQUE);
         Graphics gg = backBuffer.getGraphics();
 
@@ -90,12 +87,10 @@ public class GameVisualisation extends JPanel implements ActionListener {
         }
         gg.dispose();
 
-        if (!toClose) {
-            g.drawImage(backBuffer, 0, 0, null);
-        }
+        g.drawImage(backBuffer, 0, 0, null);
 
     }
-    
+
     private synchronized void frameRendered() {
         long t = System.currentTimeMillis();
         frames.add(t);
@@ -103,7 +98,7 @@ public class GameVisualisation extends JPanel implements ActionListener {
             frames.poll();
         }
     }
-    
+
     private synchronized int getFPS() {
         return frames.size();
     }
@@ -118,18 +113,17 @@ public class GameVisualisation extends JPanel implements ActionListener {
         if (!theFrame.isVisible()) {
             theFrame.setVisible(true);
         }
-        toClose = false;
         gameDisplayer.start();
     }
-    
+
     public synchronized void handleClosing() {
         vis.windowClosed();
         close();
     }
 
     public synchronized void close() {
-        toClose = true;
         gameDisplayer.stop();
+        setVisible(false);
     }
 
     @Override

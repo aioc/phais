@@ -2,10 +2,10 @@ package com.ausinformatics.phais.server.commands;
 
 import java.io.PrintStream;
 
+import com.ausinformatics.phais.common.Config;
+import com.ausinformatics.phais.common.Config.Mode;
 import com.ausinformatics.phais.common.commander.Command;
-import com.ausinformatics.phais.server.Config;
 import com.ausinformatics.phais.server.Director;
-import com.ausinformatics.phais.server.Config.Mode;
 
 public class ScheduleRandom implements Command {
 

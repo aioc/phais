@@ -14,12 +14,15 @@ public class StandardSpectator implements Spectator {
     private int gId;
     private String name;
     private String watchName;
+    
+    private boolean ready;
 
     public StandardSpectator(int myId, ClientConnection c) {
         this.myId = myId;
         this.c = c;
         name = "";
         watchName = "";
+        ready = true;
     }
 
     public void configure() {
@@ -81,6 +84,12 @@ public class StandardSpectator implements Spectator {
     @Override
     public boolean shouldAddToGame(List<PersistentPlayer> players, List<Spectator> spectators) {
         // It will handle groups. So, we just check if it contains the name we want.
+        if (!ready) {
+            if (!c.getAsync().equals("READY")) {
+                return false;
+            }
+            ready = true;
+        }
         if (watchName.equals("")) {
             return true;
         }
@@ -95,6 +104,11 @@ public class StandardSpectator implements Spectator {
     @Override
     public ClientConnection getConnection() {
         return c;
+    }
+
+    @Override
+    public void addedToGame() {
+        ready = false;
     }
 
 }

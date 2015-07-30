@@ -1,9 +1,15 @@
 package com.ausinformatics.phais.utils;
 
+import java.io.Serializable;
 
-public class Position {
+public class Position implements Serializable {
 
-	public final static int UP = 0;
+	/**
+     * 
+     */
+    private static final long serialVersionUID = 2766491281630412203L;
+    
+    public final static int UP = 0;
 	public final static int RIGHT = 1;
 	public final static int DOWN = 2;
 	public final static int LEFT = 3;

@@ -29,4 +29,6 @@ public interface GameVisualiser {
      * This gets called whenever the visualising window gets closed
      */
     public void windowClosed();
+    
+    public boolean finishedVisualising();
 }

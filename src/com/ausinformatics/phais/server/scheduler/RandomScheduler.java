@@ -7,7 +7,7 @@ import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.Random;
 
-import com.ausinformatics.phais.server.Config.Mode;
+import com.ausinformatics.phais.common.Config.Mode;
 import com.ausinformatics.phais.server.interfaces.PersistentPlayer;
 
 public class RandomScheduler implements GameScheduler {

@@ -2,8 +2,8 @@ package com.ausinformatics.phais.server.commands;
 
 import java.io.PrintStream;
 
+import com.ausinformatics.phais.common.Config;
 import com.ausinformatics.phais.common.commander.Command;
-import com.ausinformatics.phais.server.Config;
 import com.ausinformatics.phais.server.Director;
 
 public class SetVisualiser implements Command {

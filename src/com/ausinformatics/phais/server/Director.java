@@ -7,10 +7,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.ausinformatics.phais.common.Config;
+import com.ausinformatics.phais.common.Config.Mode;
 import com.ausinformatics.phais.common.commander.Commander;
 import com.ausinformatics.phais.common.commander.ShellCommander;
 import com.ausinformatics.phais.common.events.NetworkEventSender;
-import com.ausinformatics.phais.server.Config.Mode;
 import com.ausinformatics.phais.server.interfaces.EventManager;
 import com.ausinformatics.phais.server.interfaces.GameBuilder;
 import com.ausinformatics.phais.server.interfaces.GameInstance;
@@ -92,6 +93,7 @@ public class Director implements ClientRegister {
                 synchronized (spectatorScheduler) {
                     spectatorScheduler.addSpectator(s);
                 }
+                System.out.println("Spectator " + s.getName() + " added");
                 return;
             }
         } catch (DisconnectedException e) {

@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.ausinformatics.phais.server.Config.Mode;
+import com.ausinformatics.phais.common.Config.Mode;
 import com.ausinformatics.phais.server.interfaces.PersistentPlayer;
 
 public class PauseScheduler implements GameScheduler {

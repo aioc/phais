@@ -34,10 +34,11 @@ public class MaximisingSpectatorScheduler implements SpectatorScheduler {
         for (Spectator s : availableSpectators) {
             if (usedGid.contains(s.getGroupId())) {
                 remaining.add(s);
-            } else {
+            } else  {
                 if (s.shouldAddToGame(players, scheduled)) {
                     scheduled.add(s);
                     usedGid.add(s.getGroupId());
+                    s.addedToGame();
                 } else {
                     remaining.add(s);
                 }

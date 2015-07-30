@@ -1,8 +1,14 @@
 package com.ausinformatics.phais.common.events;
 
-public class VisualGameEvent {
+import java.io.Serializable;
 
-	public int totalFrames;
+public class VisualGameEvent implements Serializable {
+
+	/**
+     * 
+     */
+    private static final long serialVersionUID = -8065005232918251659L;
+    public int totalFrames;
 	public int curFrame;
 	public int turn;
 	
