@@ -9,9 +9,16 @@ import com.ausinformatics.phais.server.interfaces.PersistentPlayer;
 
 public class ListPlayers implements Command {
 
+    private Director d;
+    
+    public ListPlayers(Director d) {
+        this.d = d;
+    }   
+    
+    
 	@Override
-	public void execute(Director reportTo, PrintStream out, String[] args) {
-		Collection<PersistentPlayer> players = reportTo.getPlayers();
+	public void execute(PrintStream out, String[] args) {
+		Collection<PersistentPlayer> players = d.getPlayers();
 		if (players.size() == 0) {
 			out.println("No players connected.");
 		} else {

@@ -21,6 +21,7 @@ public class Config {
     public boolean visualise = false;
     public String address = "127.0.0.1";
     public int gid;
+    public String watchName = "";
 
     public Map<String, Command> gameCommands = new HashMap<String, Command>();
 
@@ -60,6 +61,9 @@ public class Config {
                 } catch (Exception e) {
                     System.out.println("Invalid gid");
                 }
+            } else if (args[i].equals("-w")) {
+                i++;
+                watchName = args[i];
             } else {
                 System.out.println("No idea what " + args[i]);
             }

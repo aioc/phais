@@ -9,9 +9,15 @@ import com.ausinformatics.phais.server.interfaces.PersistentPlayer;
 
 public class DisplayScores implements Command {
 
+    private Director d;
+    
+    public DisplayScores(Director d) {
+        this.d = d;
+    }   
+    
 	@Override
-	public void execute(Director reportTo, PrintStream out, String[] args) {
-		Map<PersistentPlayer, Integer> scores = reportTo.getScores();
+	public void execute(PrintStream out, String[] args) {
+		Map<PersistentPlayer, Integer> scores = d.getScores();
 		out.println("Scores:");
 		for (PersistentPlayer p : scores.keySet()) {
 			out.println(p.getName() + ": " + scores.get(p));

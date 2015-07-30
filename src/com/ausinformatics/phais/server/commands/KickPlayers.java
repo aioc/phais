@@ -8,15 +8,21 @@ import com.ausinformatics.phais.server.interfaces.PersistentPlayer;
 
 public class KickPlayers implements Command {
 
+    private Director d;
+    
+    public KickPlayers(Director d) {
+        this.d = d;
+    }   
+    
 	@Override
-	public void execute(Director reportTo, PrintStream out, String[] args) {
+	public void execute(PrintStream out, String[] args) {
 		if (args.length != 0) {
 			for (String name : args) {
-				PersistentPlayer toKick = reportTo.getPlayerFromName(name);
+				PersistentPlayer toKick = d.getPlayerFromName(name);
 				if (toKick == null) {
 					out.println("Error: " + name + " is not a connected player.");
 				} else {
-					reportTo.deregisterPlayer(toKick);
+					d.deregisterPlayer(toKick);
 					out.println("Kicked " + name);
 				}
 			}

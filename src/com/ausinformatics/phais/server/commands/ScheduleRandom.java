@@ -9,8 +9,15 @@ import com.ausinformatics.phais.server.Director;
 
 public class ScheduleRandom implements Command {
 
+    private Director d;
+    
+    public ScheduleRandom(Director d) {
+        this.d = d;
+    }   
+    
+    
 	@Override
-	public void execute(Director reportTo, PrintStream out, String[] args) {
+	public void execute(PrintStream out, String[] args) {
 		boolean badArgs = false;
 		if (args.length != 1) {
 			badArgs = true;
@@ -35,12 +42,12 @@ public class ScheduleRandom implements Command {
 		if (badArgs) {
 			out.println("Usage: random #playersPerGame");
 		} else {
-			Config config = reportTo.getConfig();
+			Config config = d.getConfig();
 			
 			config.mode = Mode.RANDOM;
 			config.numPlayersPerGame = numPlayersPerGame;
 			
-			reportTo.updateConfig(config);
+			d.updateConfig(config);
 		}
 	}
 

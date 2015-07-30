@@ -1,49 +1,27 @@
 package com.ausinformatics.phais.common.commander;
 
+import java.io.IOException;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 
-import com.ausinformatics.phais.server.Director;
-import com.ausinformatics.phais.server.commands.DisplayScores;
 import com.ausinformatics.phais.server.commands.HelpDisplayer;
-import com.ausinformatics.phais.server.commands.KickPlayers;
-import com.ausinformatics.phais.server.commands.Kill;
-import com.ausinformatics.phais.server.commands.ListPlayers;
-import com.ausinformatics.phais.server.commands.ScheduleGame;
-import com.ausinformatics.phais.server.commands.SchedulePause;
-import com.ausinformatics.phais.server.commands.ScheduleRandom;
-import com.ausinformatics.phais.server.commands.ScheduleRoundRobin;
-import com.ausinformatics.phais.server.commands.SetFPSCounter;
-import com.ausinformatics.phais.server.commands.SetVisualiser;
 
-public class ShellCommander implements Commander {
-	private Director reportTo;
+public class ShellCommander implements Commander, Runnable {
 	private PrintStream out;
 	private Map<String, Command> commands;
+	private boolean shouldRun;
 
-	public ShellCommander(Director reportTo, Map<String, Command> gameCommands) {
-		this.reportTo = reportTo;
+	public ShellCommander(Map<String, Command> gameCommands) {
 		out = System.out;
 		commands = new HashMap<String, Command>();
+		shouldRun = true;
 		fillCommands(gameCommands);
 	}
 
 	private void fillCommands(Map<String, Command> gameCommands) {
-		commands.put("RANDOM", new ScheduleRandom());
-		commands.put("ROUNDROBIN", new ScheduleRoundRobin());
-		commands.put("PAUSE", new SchedulePause());
-		commands.put("LS", new ListPlayers());
-		commands.put("LIST", commands.get("LS"));
-		commands.put("KICK", new KickPlayers());
-		commands.put("PLAY", new ScheduleGame());
-		commands.put("VIS", new SetVisualiser());
-		commands.put("SCORES", new DisplayScores());
-		commands.put("FPSCOUNTER", new SetFPSCounter());
-		commands.put("QUIT", new Kill());
-		
 		for (String s : gameCommands.keySet()) {
 			commands.put(s, gameCommands.get(s));
 		}
@@ -51,11 +29,13 @@ public class ShellCommander implements Commander {
 		commands.put("?", commands.get("HELP"));
 	}
 
+	
+	
 	@Override
 	public void run() {
 		Scanner in = new Scanner(System.in);
 		out.println("PHAIS shell commander. Type \"help\" or \"?\" for command list");
-		while (reportTo.isRunning()) {
+		while (shouldRun) {
 			out.print("$ ");
 			String rawInput;
 			try {
@@ -71,7 +51,7 @@ public class ShellCommander implements Commander {
 			// TODO make LIST and SCORES give a breakdown when given a specific
 			// username
 			if (commands.containsKey(command)) {
-				commands.get(command).execute(reportTo, out, args);
+				commands.get(command).execute(out, args);
 			} else {
 				out.println(command + ": command not found");
 			}
@@ -79,5 +59,22 @@ public class ShellCommander implements Commander {
 		in.close();
 		// out.println("Commander exiting...");
 	}
+
+    @Override
+    public void start() {
+        shouldRun = true;
+        Thread running = new Thread(this);
+        running.setName("Command listener");
+        running.start();
+    }
+
+    @Override
+    public void stop() {
+        shouldRun = false;
+        try {
+            System.in.close();
+        } catch (IOException e) {
+        }
+    }
 
 }

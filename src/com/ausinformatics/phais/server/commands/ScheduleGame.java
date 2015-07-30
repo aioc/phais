@@ -10,13 +10,20 @@ import com.ausinformatics.phais.server.interfaces.PersistentPlayer;
 
 public class ScheduleGame implements Command {
 
+    private Director d;
+    
+    public ScheduleGame(Director d) {
+        this.d = d;
+    }   
+    
+    
 	@Override
-	public void execute(Director reportTo, PrintStream out, String[] args) {
+	public void execute(PrintStream out, String[] args) {
 
 		List<PersistentPlayer> players = new LinkedList<PersistentPlayer>();
 
 		for (String name : args) {
-			PersistentPlayer toAdd = reportTo.getPlayerFromName(name);
+			PersistentPlayer toAdd = d.getPlayerFromName(name);
 			if (toAdd == null) {
 				out.println(name + " is not a connected player");
 			} else {
@@ -28,7 +35,7 @@ public class ScheduleGame implements Command {
 			out.println((args.length - players.size()) + " players not found, try again.");
 		} else {
 			out.println("Adding game to queue");
-			reportTo.addGameToQueue(players);
+			d.addGameToQueue(players);
 		}
 	}
 

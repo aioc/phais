@@ -16,21 +16,27 @@ public class NetworkVisualiser {
     private EventManager em;
     private EventReceiver er;
     private GameVisualiser vis;
+    private boolean shouldRun;
 
     public NetworkVisualiser(EventManager eventManager, EventReceiver eventReceiver, GameVisualiser visualiser) {
         em = eventManager;
         er = eventReceiver;
         vis = visualiser;
     }
+    
+    public void stop() {
+        shouldRun = false;
+    }
 
     public void start(SocketTransport st, GameVisualisation gv) throws IOException {
+        shouldRun = true;
         String line = st.read();
         if (!line.equals("BEGIN")) {
             System.out.println("Did not get BEGIN... something may be wrong: " + line);
             return;
         }
         gv.show(vis);
-        while (!(line = st.read()).equals("END")) {
+        while (!(line = st.read()).equals("END") && shouldRun) {
             int amount;
             try {
                 amount = Integer.parseInt(line);
@@ -44,7 +50,10 @@ public class NetworkVisualiser {
             }
             er.giveEvents(events);
         }
-        System.out.println("Finsihed getting events...");
+        if (!shouldRun) {
+            gv.close();
+            return;
+        }
         try {
             while (!vis.finishedVisualising()) {
                 Thread.sleep(10);
@@ -54,7 +63,6 @@ public class NetworkVisualiser {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        System.out.println("Finsihed game!");
         st.write("READY");
     }
 

@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import com.ausinformatics.phais.common.commander.Command;
-import com.ausinformatics.phais.server.Director;
 
 public class HelpDisplayer implements Command {
 	Map<String, Command> commands;
@@ -42,7 +41,7 @@ public class HelpDisplayer implements Command {
 	}
 
 	@Override
-	public void execute(Director reportTo, PrintStream out, String[] args) {
+	public void execute(PrintStream out, String[] args) {
 		if (listableCommands == null) {
 			juggle();
 		}

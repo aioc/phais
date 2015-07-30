@@ -9,23 +9,28 @@ import com.ausinformatics.phais.server.Director;
 
 public class SchedulePause implements Command {
 
-	@Override
-	public void execute(Director reportTo, PrintStream out, String[] args) {
-			Config config = reportTo.getConfig();
-			config.mode = Mode.PAUSE;
-			reportTo.updateConfig(config);
-		
-	}
+    private Director d;
 
-	@Override
-	public String shortHelpString() {
-		return "Pauses games being created";
-	}
+    public SchedulePause(Director d) {
+        this.d = d;
+    }
 
-	@Override
-	public String detailedHelpString() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public void execute(PrintStream out, String[] args) {
+        Config config = d.getConfig();
+        config.mode = Mode.PAUSE;
+        d.updateConfig(config);
+    }
+
+    @Override
+    public String shortHelpString() {
+        return "Pauses games being created";
+    }
+
+    @Override
+    public String detailedHelpString() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

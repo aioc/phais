@@ -9,9 +9,18 @@ import java.util.Set;
 
 import com.ausinformatics.phais.common.Config;
 import com.ausinformatics.phais.common.Config.Mode;
+import com.ausinformatics.phais.common.commander.Command;
 import com.ausinformatics.phais.common.commander.Commander;
 import com.ausinformatics.phais.common.commander.ShellCommander;
 import com.ausinformatics.phais.common.events.NetworkEventSender;
+import com.ausinformatics.phais.server.commands.DisplayScores;
+import com.ausinformatics.phais.server.commands.KickPlayers;
+import com.ausinformatics.phais.server.commands.Kill;
+import com.ausinformatics.phais.server.commands.ListPlayers;
+import com.ausinformatics.phais.server.commands.ScheduleGame;
+import com.ausinformatics.phais.server.commands.SchedulePause;
+import com.ausinformatics.phais.server.commands.ScheduleRandom;
+import com.ausinformatics.phais.server.commands.ScheduleRoundRobin;
 import com.ausinformatics.phais.server.interfaces.EventManager;
 import com.ausinformatics.phais.server.interfaces.GameBuilder;
 import com.ausinformatics.phais.server.interfaces.GameInstance;
@@ -64,7 +73,6 @@ public class Director implements ClientRegister {
         this.pBuilder = pBuilder;
         this.gBuilder = gBuilder;
         this.eventManager = eventManger;
-        sFactory = new StandardSpecatorFactory();
         runnerGetter = new RunnerFactory();
         playerMap = new HashMap<String, PersistentPlayer>();
         runningGames = new HashSet<GameRunner>();
@@ -181,6 +189,23 @@ public class Director implements ClientRegister {
             }
         }
     }
+    
+    private Map<String, Command> fillCommands(Map<String, Command> gameCommands) {
+        Map<String, Command> commands = new HashMap<>();
+        commands.put("RANDOM", new ScheduleRandom(this));
+        commands.put("ROUNDROBIN", new ScheduleRoundRobin(this));
+        commands.put("PAUSE", new SchedulePause(this));
+        commands.put("LS", new ListPlayers(this));
+        commands.put("LIST", commands.get("LS"));
+        commands.put("KICK", new KickPlayers(this));
+        commands.put("PLAY", new ScheduleGame(this));
+        commands.put("SCORES", new DisplayScores(this));
+        commands.put("QUIT", new Kill(this));
+        for (String s : gameCommands.keySet()) {
+            commands.put(s, gameCommands.get(s));
+        }
+        return commands;
+    }
 
     public void run(Config config) {
         // First, create everything we need
@@ -192,19 +217,17 @@ public class Director implements ClientRegister {
             System.exit(1);
         }
         scheduler = new RandomScheduler(config.numPlayersPerGame);
-        spectatorScheduler = new MaximisingSpectatorScheduler();
-        commander = new ShellCommander(this, config.gameCommands);
-        scoreKeeper = new StandardScoreKeeper();
         
-        // TODO: Create spectator scheduler and factory.
+        commander = new ShellCommander(fillCommands(config.gameCommands));
+        scoreKeeper = new StandardScoreKeeper();
+        spectatorScheduler = new MaximisingSpectatorScheduler();
+        sFactory = new StandardSpecatorFactory();
 
         // We now create the threads we need for various things
         Thread t = new Thread(server);
         t.setName("Server listener");
         t.start();
-        t = new Thread(commander);
-        t.setName("Command listener");
-        t.start();
+        commander.start();
 
         while (running) {
             try {
@@ -275,9 +298,11 @@ public class Director implements ClientRegister {
         cleanUp();
 
         System.out.println("Director exiting...");
+        System.exit(0);
     }
 
     private void cleanUp() {
+        commander.stop();
         server.kill();
         for (PersistentPlayer p : playerMap.values()) {
             p.getConnection().disconnect();

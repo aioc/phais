@@ -9,25 +9,31 @@ import com.ausinformatics.phais.server.Director;
 
 public class ScheduleRoundRobin implements Command {
 
-	@Override
-	public void execute(Director reportTo, PrintStream out, String[] args) {
-			Config config = reportTo.getConfig();
-			
-			config.mode = Mode.ROUND_ROBIN;
-			config.numPlayersPerGame = 2;
-			
-			reportTo.updateConfig(config);
-	}
+    private Director d;
 
-	@Override
-	public String shortHelpString() {
-		return "Switches the game scheduler to do a round robin.";
-	}
+    public ScheduleRoundRobin(Director d) {
+        this.d = d;
+    }
 
-	@Override
-	public String detailedHelpString() {
-		// TODO Auto-generated method stub
-		return null;
-	}
+    @Override
+    public void execute(PrintStream out, String[] args) {
+        Config config = d.getConfig();
+
+        config.mode = Mode.ROUND_ROBIN;
+        config.numPlayersPerGame = 2;
+
+        d.updateConfig(config);
+    }
+
+    @Override
+    public String shortHelpString() {
+        return "Switches the game scheduler to do a round robin.";
+    }
+
+    @Override
+    public String detailedHelpString() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }

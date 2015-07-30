@@ -1,5 +1,9 @@
 package com.ausinformatics.phais.common.commander;
 
-public interface Commander extends Runnable {
+public interface Commander {
 
+    void start();
+    
+    void stop();
+    
 }

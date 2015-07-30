@@ -1,27 +1,27 @@
-package com.ausinformatics.phais.server.commands;
+package com.ausinformatics.phais.spectator.commands;
 
 import java.io.PrintStream;
 
 import com.ausinformatics.phais.common.commander.Command;
-import com.ausinformatics.phais.server.Director;
+import com.ausinformatics.phais.spectator.VisualiserDirector;
 
-public class Kill implements Command {
+public class KillVis<S> implements Command {
 
-    private Director d;
+    private VisualiserDirector<S> d;
     
-    public Kill(Director d) {
+    public KillVis(VisualiserDirector<S> d) {
         this.d = d;
     }   
     
     
 	@Override
 	public void execute(PrintStream out, String[] args) {
-		d.kill();
+		d.stop();
 	}
 
 	@Override
 	public String shortHelpString() {
-		return "Kills the server";
+		return "Kills the visualiser";
 	}
 
 	@Override
