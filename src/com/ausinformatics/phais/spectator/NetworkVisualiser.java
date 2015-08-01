@@ -37,16 +37,25 @@ public class NetworkVisualiser {
         }
         gv.show(vis);
         while (!(line = st.read()).equals("END") && shouldRun) {
+            String[] tokens = line.split(" ");
+            if (tokens.length == 0) {
+                System.out.println("Invalid line: " + line);
+                return;
+            }
             int amount;
             try {
-                amount = Integer.parseInt(line);
+                amount = Integer.parseInt(tokens[0]);
             } catch (NumberFormatException e) {
                 System.out.println("Could not read amount of events: " + line);
                 return;
             }
+            if (tokens.length != amount + 1) {
+                System.out.println("Inconsistent number of tokens: " + line);
+                return;
+            }
             List<VisualGameEvent> events = new ArrayList<>();
             for (int i = 0; i < amount; i++) {
-                events.add(em.fromData(st.read()));
+                events.add(em.fromData(tokens[i + 1]));
             }
             er.giveEvents(events);
         }

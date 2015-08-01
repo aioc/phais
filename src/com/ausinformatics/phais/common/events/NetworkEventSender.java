@@ -24,11 +24,14 @@ public class NetworkEventSender implements EventReceiver, SpectatorCommunicator 
 
     @Override
     public void giveEvents(List<VisualGameEvent> events) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(events.size());
+        for (VisualGameEvent e : events) {
+            sb.append(" ");
+            sb.append(manager.toData(e));
+        }
         for (Spectator s : spectators) {
-            s.getConnection().sendInfo(events.size());
-            for (VisualGameEvent e : events) {
-                s.getConnection().sendInfo(manager.toData(e));
-            }
+            s.getConnection().sendInfo(sb.toString());
         }
     }
     
