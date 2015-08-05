@@ -23,36 +23,37 @@ public class VisualiserDirector<S> {
     private FrameVisualiserFactory<S> factory;
     NetworkVisualiser nv;
     private boolean shouldRun;
-    
+
     public VisualiserDirector(EventManager em, FrameVisualiserFactory<S> factory) {
         this.em = em;
         this.factory = factory;
     }
-    
+
     private Map<String, Command> getCommands() {
         Map<String, Command> commands = new HashMap<>();
         commands.put("SETFPS", new SetFPSCounter());
         commands.put("QUIT", new KillVis<>(this));
         return commands;
     }
-    
+
     public void stop() {
         shouldRun = false;
         nv.stop();
     }
-    
+
     public void runForever(String address, int port, int gid, String name) {
         shouldRun = true;
         // Start a commander.
-        
+
         SocketTransport st;
         try {
-            st = new SocketTransport(new Socket(address, port));
+            Socket sock = new Socket(address, port);
+            sock.getOutputStream().write('V');
+            st = new SocketTransport(sock);
         } catch (IOException e) {
             System.out.println("Error connecting: " + e.getMessage());
             return;
         }
-        st.write("spectator");
         try {
             String ds = st.read();
             if (ds.equals("DETAILS")) {
@@ -84,5 +85,5 @@ public class VisualiserDirector<S> {
         c.stop();
         System.exit(0);
     }
-    
+
 }

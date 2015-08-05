@@ -36,9 +36,9 @@ import com.ausinformatics.phais.server.scheduler.RoundRobinScheduler;
 import com.ausinformatics.phais.server.scheduler.SpectatorScheduler;
 import com.ausinformatics.phais.server.scorer.ScoreKeeper;
 import com.ausinformatics.phais.server.scorer.StandardScoreKeeper;
+import com.ausinformatics.phais.server.server.TextClientConnection;
 import com.ausinformatics.phais.server.server.ClientConnection;
 import com.ausinformatics.phais.server.server.ClientRegister;
-import com.ausinformatics.phais.server.server.DisconnectedException;
 import com.ausinformatics.phais.server.server.Server;
 import com.ausinformatics.phais.server.spectators.Spectator;
 import com.ausinformatics.phais.server.spectators.SpectatorFactory;
@@ -50,9 +50,9 @@ public class Director implements ClientRegister {
 
     private GameBuilder gBuilder;
     private PlayerBuilder pBuilder;
-    
+
     private EventManager eventManager;
-    
+
     private SpectatorFactory sFactory;
 
     private Integer curGameID;
@@ -84,6 +84,7 @@ public class Director implements ClientRegister {
         return running;
     }
 
+    @Override
     public void registerPlayer(ClientConnection p) {
         int copiedID;
         synchronized (curGameID) {
@@ -91,25 +92,21 @@ public class Director implements ClientRegister {
             curGameID++;
         }
         // Check if they are a player or spectator.
-        try {
-            String token = p.getStrInput();
-            if (token.equals("spectator")) {
-                Spectator s = sFactory.makeSpectator(copiedID, p);
-                if (!s.getConnection().isConnected()) {
-                    return;
-                }
-                synchronized (spectatorScheduler) {
-                    spectatorScheduler.addSpectator(s);
-                }
-                System.out.println("Spectator " + s.getName() + " added");
+        if (p instanceof TextClientConnection) {
+            Spectator s = sFactory.makeSpectator(copiedID, p);
+            if (!s.getConnection().isConnected()) {
                 return;
             }
-        } catch (DisconnectedException e) {
+            synchronized (spectatorScheduler) {
+                spectatorScheduler.addSpectator(s);
+            }
+            System.out.println("Spectator " + s.getName() + " added");
             return;
         }
 
         PersistentPlayer newPlayer = pBuilder.createPlayer(copiedID, p);
         if (!newPlayer.getConnection().isConnected()) {
+            System.out.println("Player factory returned a disconnected player.");
             return;
         }
         synchronized (playerMap) {
@@ -177,7 +174,7 @@ public class Director implements ClientRegister {
             }
         }
     }
-    
+
     private void rescheduleSpectators(List<Spectator> spectators) {
         synchronized (spectatorScheduler) {
             for (Spectator s : spectators) {
@@ -189,7 +186,7 @@ public class Director implements ClientRegister {
             }
         }
     }
-    
+
     private Map<String, Command> fillCommands(Map<String, Command> gameCommands) {
         Map<String, Command> commands = new HashMap<>();
         commands.put("RANDOM", new ScheduleRandom(this));
@@ -217,7 +214,7 @@ public class Director implements ClientRegister {
             System.exit(1);
         }
         scheduler = new RandomScheduler(config.numPlayersPerGame);
-        
+
         commander = new ShellCommander(fillCommands(config.gameCommands));
         scoreKeeper = new StandardScoreKeeper();
         spectatorScheduler = new MaximisingSpectatorScheduler();
